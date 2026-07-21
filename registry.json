@@ -1,0 +1,102 @@
+{
+  "$schema": "./registry.schema.json",
+  "version": 1,
+  "skills": [
+    {
+      "id": "linkrunner-flutter",
+      "category": "sdk",
+      "platform": "flutter",
+      "aliases": ["flutter", "dart"],
+      "path": "skills/sdk/flutter",
+      "title": "Linkrunner - Flutter integration",
+      "description": "Integrate the Linkrunner attribution SDK into a Flutter app: install, init, identify users, track events/revenue, and set up deep linking (Universal Links / App Links / custom schemes) with verification.",
+      "package": "linkrunner",
+      "docs": "https://docs.linkrunner.io/sdk/flutter",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-react-native",
+      "category": "sdk",
+      "platform": "react-native",
+      "aliases": ["react-native", "rn", "reactnative"],
+      "path": "skills/sdk/react-native",
+      "title": "Linkrunner - React Native integration",
+      "description": "Integrate the Linkrunner attribution SDK into a React Native app: install, init, identify users, track events/revenue, and set up deep linking with React Navigation + verification.",
+      "package": "rn-linkrunner",
+      "docs": "https://docs.linkrunner.io/sdk/react-native",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-expo",
+      "category": "sdk",
+      "platform": "expo",
+      "aliases": ["expo"],
+      "path": "skills/sdk/expo",
+      "title": "Linkrunner - Expo integration",
+      "description": "Integrate the Linkrunner attribution SDK into an Expo app via the config plugin: install, init, identify users, track events/revenue, and set up deep linking with expo-router / Linking + verification.",
+      "package": "expo-linkrunner",
+      "docs": "https://docs.linkrunner.io/sdk/expo",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-ios",
+      "category": "sdk",
+      "platform": "ios",
+      "aliases": ["ios", "swift", "swiftui"],
+      "path": "skills/sdk/ios",
+      "title": "Linkrunner - iOS (native) integration",
+      "description": "Integrate the Linkrunner attribution SDK into a native iOS (Swift) app: install via Swift Package Manager, init, identify users, track events/revenue, and set up Universal Links + custom URL schemes with verification.",
+      "package": "linkrunner-ios",
+      "docs": "https://docs.linkrunner.io/sdk/ios",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-android",
+      "category": "sdk",
+      "platform": "android",
+      "aliases": ["android", "kotlin"],
+      "path": "skills/sdk/android",
+      "title": "Linkrunner - Android (native) integration",
+      "description": "Integrate the Linkrunner attribution SDK into a native Android (Kotlin) app: install via Maven, init, identify users, track events/revenue, and set up App Links + custom schemes with assetlinks verification.",
+      "package": "io.linkrunner:android-sdk",
+      "docs": "https://docs.linkrunner.io/sdk/android",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-capacitor",
+      "category": "sdk",
+      "platform": "capacitor",
+      "aliases": ["capacitor", "ionic"],
+      "path": "skills/sdk/capacitor",
+      "title": "Linkrunner - Capacitor integration",
+      "description": "Integrate the Linkrunner attribution SDK into a Capacitor / Ionic app: install, init, identify users, track events/revenue, and set up deep linking (App Links / Universal Links / custom schemes) with verification.",
+      "package": "capacitor-linkrunner",
+      "docs": "https://docs.linkrunner.io/sdk/capacitor",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-cordova",
+      "category": "sdk",
+      "platform": "cordova",
+      "aliases": ["cordova", "apache-cordova"],
+      "path": "skills/sdk/cordova",
+      "title": "Linkrunner - Cordova integration",
+      "description": "Integrate the Linkrunner attribution SDK into an Apache Cordova app: install the cordova-linkrunner plugin, init via window.linkrunner, identify users, track events/revenue, and set up deep linking (App Links / Universal Links / custom schemes) with verification.",
+      "package": "cordova-linkrunner",
+      "docs": "https://docs.linkrunner.io/sdk/cordova",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-unity",
+      "category": "sdk",
+      "platform": "unity",
+      "aliases": ["unity", "unity3d", "csharp"],
+      "path": "skills/sdk/unity",
+      "title": "Linkrunner - Unity integration",
+      "description": "Integrate Linkrunner into a Unity app via the native Android and iOS SDKs with platform bridges (Android io.linkrunner:android-sdk / LinkrunnerJava, iOS LinkrunnerKit Swift bridge, C# wrapper) and deep-link verification. There is no dedicated Unity SDK.",
+      "package": "native bridge (io.linkrunner:android-sdk + LinkrunnerKit)",
+      "docs": "https://docs.linkrunner.io/sdk/unity",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    }
+  ]
+}
