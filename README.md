@@ -40,6 +40,18 @@ npx @linkrunner/skills add flutter --dry-run   # preview, write nothing
 | Cordova | `linkrunner-cordova` | `cordova-linkrunner` |
 | Unity | `linkrunner-unity` | native bridge (Android + iOS SDKs) |
 
+## Beyond SDK integration
+
+Cross-cutting skills that are not tied to one platform:
+
+| Skill | Install | What it does |
+| --- | --- | --- |
+| Deep link troubleshooter | `npx @linkrunner/skills add deep-links` | Diagnoses why Universal Links / App Links open the browser instead of the app and reports the exact fix |
+| Event & revenue instrumentation | `npx @linkrunner/skills add events` | Correct event taxonomy + revenue (dedupe / refunds) + server-side event/revenue APIs |
+| Webhooks receiver | `npx @linkrunner/skills add webhooks` | Writes a webhook endpoint in your backend that verifies the `linkrunner-key` header and handles install/signup payloads |
+
+Run `npx @linkrunner/skills list` to see everything grouped by category.
+
 ## What each skill contains
 
 ```

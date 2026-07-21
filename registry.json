@@ -97,6 +97,39 @@
       "package": "native bridge (io.linkrunner:android-sdk + LinkrunnerKit)",
       "docs": "https://docs.linkrunner.io/sdk/unity",
       "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-troubleshoot-deep-links",
+      "category": "troubleshoot",
+      "slug": "deep-links",
+      "aliases": ["deep-links", "deeplinks", "deep-link", "universal-links", "app-links"],
+      "path": "skills/troubleshoot/deep-links",
+      "title": "Linkrunner - deep link troubleshooter",
+      "description": "Diagnose why Linkrunner deep links open the browser instead of the app: checks hosted AASA/assetlinks, Apple CDN freshness, Android fingerprint + verification state, entitlements and manifest wiring, and reports exactly what is broken.",
+      "docs": "https://docs.linkrunner.io/features/deep-linking-setup#debugging-domain-verification",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-events",
+      "category": "events",
+      "slug": "events",
+      "aliases": ["events", "revenue", "ecommerce", "trackevent", "purchases"],
+      "path": "skills/events/instrumentation",
+      "title": "Linkrunner - event & revenue instrumentation",
+      "description": "Instrument Linkrunner events and revenue correctly: standard ecommerce taxonomy, capturePayment/removePayment with dedupe and refunds, and the server-side Capture Event / Revenue Tracking APIs. Platform-agnostic; defers exact call syntax to your SDK skill.",
+      "docs": "https://docs.linkrunner.io/api-reference/event-capture",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-webhooks",
+      "category": "integrations",
+      "slug": "webhooks",
+      "aliases": ["webhooks", "webhook"],
+      "path": "skills/integrations/webhooks",
+      "title": "Linkrunner - webhooks receiver",
+      "description": "Write a Linkrunner webhook receiver in your backend: accept install/signup POSTs, verify the linkrunner-key header, handle device ids (install) and user identity (signup) idempotently, and ack 2xx fast.",
+      "docs": "https://docs.linkrunner.io/features/webhooks",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
     }
   ]
 }

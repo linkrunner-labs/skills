@@ -37,7 +37,7 @@ const AGENTS = {
 function resolveSkill(query) {
   const q = query.toLowerCase();
   return REGISTRY.skills.find(
-    (s) => s.id === q || s.platform === q || (s.aliases || []).includes(q),
+    (s) => s.id === q || s.slug === q || s.platform === q || (s.aliases || []).includes(q),
   );
 }
 
@@ -163,10 +163,10 @@ function cmdList() {
   for (const s of REGISTRY.skills) (byCat[s.category] ||= []).push(s);
   for (const [cat, skills] of Object.entries(byCat)) {
     console.log(`${c.b}${cat}${c.n}`);
-    for (const s of skills) console.log(`  ${c.g}${s.platform.padEnd(14)}${c.n} ${s.description.split(':')[0]}`);
+    for (const s of skills) console.log(`  ${c.g}${(s.slug || s.platform).padEnd(14)}${c.n} ${s.description.split(':')[0]}`);
     console.log('');
   }
-  console.log(`${c.d}install: npx @linkrunner/skills add <platform> [--agent <agent>]${c.n}`);
+  console.log(`${c.d}install: npx @linkrunner/skills add <name> [--agent <agent>]${c.n}`);
 }
 
 function cmdAdd(args) {

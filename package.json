@@ -1,6 +1,6 @@
 {
   "name": "@linkrunner/skills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Installable Agent Skills for integrating the Linkrunner SDK and deep linking into your app, for AI coding agents (Claude Code, Cursor, Windsurf, Copilot).",
   "type": "module",
   "bin": {
