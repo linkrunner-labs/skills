@@ -1,8 +1,14 @@
 # Linkrunner Agent Skills
 
+[![npm version](https://img.shields.io/npm/v/@linkrunner/skills.svg)](https://www.npmjs.com/package/@linkrunner/skills)
+[![npm downloads](https://img.shields.io/npm/dm/@linkrunner/skills.svg)](https://www.npmjs.com/package/@linkrunner/skills)
+[![license](https://img.shields.io/npm/l/@linkrunner/skills.svg)](./LICENSE)
+
 Installable **Agent Skills** that teach your AI coding agent how to integrate the
 [Linkrunner](https://linkrunner.io) attribution SDK and set up deep linking -
 correctly, and with self-verifying checks - instead of following the docs by hand.
+
+Published on npm as **[`@linkrunner/skills`](https://www.npmjs.com/package/@linkrunner/skills)**.
 
 Works with Claude Code, Cursor, Windsurf, GitHub Copilot, or any agent that reads
 `AGENTS.md`.
