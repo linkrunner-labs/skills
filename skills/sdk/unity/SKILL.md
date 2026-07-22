@@ -81,7 +81,7 @@ platforms the game actually ships before wiring both bridges.
 
 - Unity 2021.3 LTS or newer
 - Android: API 21+ (Android 5.0+), Gradle 8.0+, `io.linkrunner:android-sdk:3.6.0+`
-- iOS: iOS 15.0+, Xcode 14.0+, Swift 5.9+, `linkrunner-ios` 3.8.0+ (`LinkrunnerStatic` library)
+- iOS: iOS 15.0+, Xcode 14.0+, Swift 5.9+, `linkrunner-ios` 3.8.0+ (`LinkrunnerKitStatic` library)
 - A `GameObject` named exactly `LinkrunnerCallbackHandler` in the first scene,
   carrying `LinkrunnerSDK.cs` - both native bridges call back into it by name.
 

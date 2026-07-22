@@ -23,13 +23,13 @@ on CocoaPods, point them at the docs URL above instead of guessing a pod name.
    ```
 3. Select the version (latest recommended)
 4. **Add Package**
-5. Choose the library type **LinkrunnerStatic**
+5. Choose the library type **LinkrunnerKitStatic**
 
 ### Via `Package.swift`
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/linkrunner-labs/linkrunner-ios.git", from: "3.0.2")
+    .package(url: "https://github.com/linkrunner-labs/linkrunner-ios.git", from: "3.12.0")
 ]
 ```
 
@@ -38,7 +38,7 @@ targets: [
     .target(
         name: "YourApp",
         dependencies: [
-            .product(name: "Linkrunner", package: "linkrunner-ios")
+            .product(name: "LinkrunnerKitStatic", package: "linkrunner-ios")
         ]
     )
 ]
@@ -47,8 +47,11 @@ targets: [
 ### Import
 
 ```swift
-import Linkrunner
+import LinkrunnerKit
 ```
+
+Use `import LinkrunnerKit` for v3.0.0 and later. The public API remains
+`LinkrunnerSDK.shared`.
 
 ## 2. Info.plist configuration
 
@@ -85,7 +88,7 @@ Project token: dashboard -> Settings
 ([direct link](https://dashboard.linkrunner.io/dashboard?s=members&m=documentation)).
 
 ```swift
-import Linkrunner
+import LinkrunnerKit
 import SwiftUI
 
 @main

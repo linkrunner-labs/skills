@@ -98,7 +98,7 @@ Verify captured events on the
 linkrunner.capturePayment({
     amount: 100, // Required: payment amount
     userId: "user123", // Required: user identifier
-    paymentId: "payment456", // Optional: unique payment identifier
+    paymentId: "payment456", // Required: unique payment identifier, used to deduplicate transactions
     type: "FIRST_PAYMENT", // Optional: see payment types below
     status: "PAYMENT_COMPLETED", // Optional: see statuses below
     eventData: { // Optional: ecommerce/custom event data
@@ -142,11 +142,15 @@ linkrunner.removePayment({
 ```javascript
 linkrunner.trackEvent(
     "purchase_initiated", // event name
-    { product_id: "12345", category: "electronics", amount: 99.99 } // optional payload
+    { product_id: "12345", category: "electronics", amount: 99.99 }, // optional payload
+    "order_12345" // optional: your own event identifier, for dedup/correlation with your backend
 ).then(function () {
     console.log("Event tracked");
 });
 ```
+
+`trackEvent(eventName, eventData?, eventId?)` - `eventId` is a string or
+number, useful for deduplication and correlating with your backend.
 
 Events are only stored for attributed users - `signup` must run first. Prefer
 `capturePayment` over `trackEvent` for revenue.
@@ -178,6 +182,42 @@ linkrunner.enablePIIHashing(true);
 When enabled, name/email/phone are SHA-256 hashed before being sent to
 Linkrunner servers.
 
+## Uninstall tracking (setPushToken)
+
+Requires a Cordova push notification plugin (e.g. `cordova-plugin-push`),
+Firebase Cloud Messaging wired up on Android, and
+[APNs registration](https://developer.apple.com/documentation/usernotifications/registering-your-app-with-apns)
+on iOS. See the
+[Uninstall Tracking guide](https://docs.linkrunner.io/sdk/cordova#uninstall-tracking)
+for the full FCM HTTP v1 setup (service account + role) and Apple Developer
+Portal steps (APNs key, Key ID, Bundle ID, Team ID) - then enter those under
+**Settings > Uninstall Tracking** in the Linkrunner dashboard (separate
+Android/iOS tabs).
+
+Once the dashboard is configured, forward the device's push/APNs token to
+Linkrunner on registration:
+
+```javascript
+push.on('registration', function (data) {
+    linkrunner.setPushToken(data.registrationId).then(function () {
+        console.log("Push token set successfully");
+    });
+});
+```
+
+On Android, also filter out Linkrunner's silent uninstall-tracking
+notifications so they never surface to the user:
+
+```javascript
+push.on('notification', function (data) {
+    if (data.additionalData && data.additionalData['lr-uninstall-tracking']) {
+        // Silent notification for uninstall tracking, ignore
+        return;
+    }
+    // Handle other notifications here
+});
+```
+
 ## Attribution + resolved deeplink
 
 ```javascript
@@ -203,7 +243,12 @@ Returns:
             storeClickAt: "string" | null,
             groupName: "string",
             assetName: "string",
-            assetGroupName: "string"
+            assetGroupName: "string",
+            adNetworkCampaignId: "string", // Ad network campaign ID
+            adSetId: "string", // Ad set ID
+            adSetName: "string", // Ad set name
+            adCreativeId: "string", // Ad creative ID
+            adCreativeName: "string" // Ad creative name
         }
     }
 }

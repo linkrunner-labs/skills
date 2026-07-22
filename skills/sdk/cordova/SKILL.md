@@ -40,6 +40,7 @@ editing** - do not paste snippets blindly.
 | "Add Linkrunner / set up attribution" | `references/install.md` then `references/events.md` (at minimum init + signup) |
 | "Set up deep links" / "links open the browser not my app" | `references/deep-linking.md` + run `scripts/verify-deeplinks.sh` |
 | "Track purchases / events" | `references/events.md` |
+| "Set up uninstall tracking / push token" | `references/events.md` (Uninstall tracking / setPushToken) |
 
 Most first-time integrations need **install → init → signup → handle deeplink**,
 in that order. Deep-link *verification* (AASA / assetlinks) is separate and is

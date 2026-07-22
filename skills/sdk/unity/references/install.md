@@ -86,7 +86,7 @@ After Unity builds the Xcode project:
 
 1. Xcode → **File → Add Package Dependencies...**
 2. URL: `https://github.com/linkrunner-labs/linkrunner-ios.git`
-3. Version 3.8.0+, add package, select the **LinkrunnerStatic** library (not
+3. Version 3.8.0+, add package, select the **LinkrunnerKitStatic** library (not
    the dynamic variant - picking the wrong one causes linker errors)
 
 This step does not survive Unity regenerating the Xcode project, so it must

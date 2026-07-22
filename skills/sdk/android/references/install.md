@@ -8,7 +8,7 @@ Source of truth: https://docs.linkrunner.io/sdk/android
 
 ```gradle
 dependencies {
-    implementation 'io.linkrunner:android-sdk:2.1.5'
+    implementation 'io.linkrunner:android-sdk:3.10.0'
 }
 ```
 
@@ -52,7 +52,8 @@ To remove:
 
 ...and call `LinkRunner.getInstance().setDisableAaidCollection(true)` before
 `init()` (SDK 3.5.0+). Disabling AAID reduces Google Ads attribution accuracy,
-so only do this when the Family Policy actually requires it.
+so only do this when the Family Policy actually requires it. Check the
+current state with `LinkRunner.getInstance().isAaidCollectionDisabled()`.
 
 ## 3. Backup configuration (recommended)
 

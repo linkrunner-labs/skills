@@ -34,7 +34,28 @@ cd ios/App && pod install
 <string>This identifier will be used to deliver personalized ads and improve your app experience.</string>
 ```
 
-## 4. Android configuration - Kotlin Gradle plugin
+## 4. SKAdNetwork configuration (iOS)
+
+To enable SKAdNetwork postback copies to be sent to Linkrunner, add these keys
+to `ios/App/App/Info.plist`:
+
+```xml
+<key>NSAdvertisingAttributionReportEndpoint</key>
+<string>https://linkrunner-skan.com</string>
+<key>AttributionCopyEndpoint</key>
+<string>https://linkrunner-skan.com</string>
+```
+
+Full setup: https://docs.linkrunner.io/features/skadnetwork-integration
+
+## 5. Android backup configuration
+
+The SDK provides backup rules to exclude its SharedPreferences from Android
+backup. This prevents the Linkrunner install ID from surviving a backup/restore,
+so reinstalls and re-installs are detected correctly. Full XML rules:
+https://docs.linkrunner.io/sdk/android#backup-configuration
+
+## 6. Android configuration - Kotlin Gradle plugin
 
 The Capacitor SDK ships a native Kotlin module and requires the Kotlin Gradle
 plugin. Add it to the root `build.gradle` under `dependencies`:
@@ -61,7 +82,7 @@ buildscript {
 Without this, the Android build fails - check for it before assuming the
 integration is broken elsewhere.
 
-## 5. Initialize (required, before anything else)
+## 7. Initialize (required, before anything else)
 
 `init()` returns nothing. Attribution + deeplink data comes from
 `getAttributionData()` later (see `references/events.md`). Call it from the
@@ -87,7 +108,7 @@ init();
 **SDK signing** (optional, more secure): `secretKey` + `keyId` from
 dashboard → Settings → SDK Signing.
 
-## 6. Verify install
+## 8. Verify install
 
 - `npm install` / `yarn` resolves cleanly and `npx cap sync` completes without
   errors

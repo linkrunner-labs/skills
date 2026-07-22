@@ -44,7 +44,32 @@ These are required for IDFA collection and Apple's App Tracking Transparency
 (ATT) compliance. The doc does not describe any Android-side native changes
 made by the plugin itself.
 
-## 3. Prebuild your project
+## 3. SKAdNetwork configuration (manual - the plugin does not add this)
+
+To enable SKAdNetwork postback copies to be sent to Linkrunner, add these two
+keys to your iOS `Info.plist`. The `expo-linkrunner` config plugin only adds
+`NSUserTrackingUsageDescription` - it does not add these, so set them yourself
+via `expo.ios.infoPlist` in `app.json` (or `app.config.js`):
+
+```json
+{
+    "expo": {
+        "ios": {
+            "infoPlist": {
+                "NSAdvertisingAttributionReportEndpoint": "https://linkrunner-skan.com",
+                "AttributionCopyEndpoint": "https://linkrunner-skan.com"
+            }
+        }
+    }
+}
+```
+
+These merge into `Info.plist` on the next `expo prebuild` - do not hand-edit
+`ios/*/Info.plist` directly if `ios/` is gitignored (CNG), it will be
+overwritten. For complete SKAdNetwork integration details, see the
+[SKAdNetwork Integration Guide](https://docs.linkrunner.io/features/skadnetwork-integration).
+
+## 4. Prebuild your project
 
 - **EAS Build**, with `android`/`ios` gitignored (recommended): prebuild runs
   automatically as part of the build. No manual action needed.
@@ -57,7 +82,7 @@ made by the plugin itself.
 **Expo Go will not work.** The SDK relies on native libraries, so you need a
 [development build](https://docs.expo.dev/develop/development-builds/introduction/).
 
-## 4. Android backup configuration (manual - the plugin does not add this)
+## 5. Android backup configuration (manual - the plugin does not add this)
 
 The SDK excludes its SharedPreferences (the persisted install ID) from Android
 backup/restore, so a restored device is correctly detected as a new install
@@ -108,7 +133,7 @@ so it's no longer regenerated, or write a small custom config plugin (using
 `withAndroidManifest` / `withDangerousMod` from `@expo/config-plugins`) that
 injects the manifest attributes and XML resource files on every prebuild.
 
-## 5. Initialize (required, before anything else)
+## 6. Initialize (required, before anything else)
 
 All runtime calls come from `rn-linkrunner`, imported directly - identical to
 the React Native SDK. `init()` returns nothing; read attribution later via
@@ -138,7 +163,7 @@ const init = async () => {
 **SDK signing** (optional, more secure): `secretKey` + `keyId` from
 dashboard → Settings → SDK Signing.
 
-## 6. Verify install
+## 7. Verify install
 
 - `npx expo prebuild` completes without errors (or EAS Build succeeds)
 - The app runs on a development build on both platforms

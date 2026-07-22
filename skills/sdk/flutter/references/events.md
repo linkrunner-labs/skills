@@ -51,9 +51,9 @@ first.
 ```dart
 await LinkRunner().capturePayment(
   capturePayment: LRCapturePayment(
-    userId: '123',
-    amount: 499.0,
-    paymentId: 'unique_payment_id',
+    userId: '123',                   // required
+    amount: 499.0,                   // required
+    paymentId: 'unique_payment_id',  // required - dedup key, used to avoid double-counting the payment
   ),
 );
 
@@ -70,8 +70,9 @@ that user's payments are removed.
 
 ```dart
 await LinkRunner().trackEvent(
-  'AddToCart',                 // event name
-  { 'productId': 'SKU_123' },  // optional payload
+  eventName: 'AddToCart',                  // required
+  eventData: { 'productId': 'SKU_123' },   // optional payload
+  eventId: 'order_12345',                  // optional - your own unique event id (String or num), for dedup / correlating with your backend
 );
 ```
 
@@ -82,9 +83,34 @@ Purchases go through `capturePayment` with the ecommerce payload (see docs).
 ```dart
 final attributionData = await LinkRunner().getAttributionData();
 // attributionData.deeplink        -> resolved destination (nullable)
-// attributionData.campaignData.id / .name
+// attributionData.campaignData.id / .name / .adNetwork / .groupName / .assetGroupName / .assetName
+// attributionData.campaignData.adNetworkCampaignId / .adSetId / .adSetName / .adCreativeId / .adCreativeName
+// attributionData.campaignData.type / .installedAt / .storeClickAt
 ```
 
 Use `getAttributionData()` (not `init`'s return) to read attribution and the
 deeplink that led to the install - useful for deferred deep linking / routing a
-new user to the right screen after first open.
+new user to the right screen after first open. The `adNetworkCampaignId` /
+`adSetId` / `adSetName` / `adCreativeId` / `adCreativeName` fields are
+optional and populated for Meta/Google inorganic installs.
+
+## Uninstall tracking (setPushToken)
+
+Uninstall detection needs a push token so Linkrunner can send a silent
+notification. On Android that means an FCM token; on iOS an APNs token. Fetch
+it and hand it to the SDK:
+
+```dart
+String? token = await FirebaseMessaging.instance.getToken(); // Android (FCM)
+// String? token = await FirebaseMessaging.instance.getAPNSToken(); // iOS (APNs)
+if (token != null) {
+  await LinkRunner().setPushToken(token);
+}
+```
+
+Also call `setPushToken` again from `FirebaseMessaging.instance.onTokenRefresh`
+so a rotated token stays current. This is only half the setup - you also need
+Firebase Cloud Messaging wired up in the app and the FCM project ID
+(Android) / APNs key, Key ID, Bundle ID, Team ID (iOS) entered under
+Linkrunner dashboard Settings -> Uninstall Tracking. Full walkthrough:
+https://docs.linkrunner.io/sdk/flutter#uninstall-tracking

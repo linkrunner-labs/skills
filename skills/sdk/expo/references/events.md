@@ -90,7 +90,7 @@ const capturePayment = async () => {
     await linkrunner.capturePayment({
         amount: 100, // required
         userId: "user123", // required
-        paymentId: "payment456", // optional - unique payment identifier
+        paymentId: "payment456", // required - unique payment identifier, used to deduplicate transactions
         type: "FIRST_PAYMENT", // optional: FIRST_PAYMENT | SECOND_PAYMENT | WALLET_TOPUP |
         // FUNDS_WITHDRAWAL | SUBSCRIPTION_CREATED | SUBSCRIPTION_RENEWED |
         // ONE_TIME | RECURRING | DEFAULT
@@ -124,9 +124,13 @@ of that user's payments are removed.
 ```javascript
 await linkrunner.trackEvent(
     "purchase_initiated", // event name
-    { product_id: "12345", category: "electronics", amount: 99.99 } // optional payload
+    { product_id: "12345", category: "electronics", amount: 99.99 }, // optional payload
+    "order_12345" // optional - your own unique event identifier (string or number)
 );
 ```
+
+`eventId` is your own unique identifier for the event - optional, useful for
+deduplication and correlating with your backend.
 
 Events are only stored for attributed users - `signup` must run first. To
 share revenue with ad networks (Meta, Google), include a numeric `amount` in
@@ -165,6 +169,11 @@ Returns:
         groupName?: string;
         assetName?: string;
         assetGroupName?: string;
+        adNetworkCampaignId?: string | null; // ad network campaign ID
+        adSetId?: string | null; // ad set ID
+        adSetName?: string | null; // ad set name
+        adCreativeId?: string | null; // ad creative ID
+        adCreativeName?: string | null; // ad creative name
     }
 }
 ```

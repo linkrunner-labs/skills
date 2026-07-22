@@ -74,7 +74,7 @@ await linkrunner.setUserData({
 await linkrunner.capturePayment({
     amount: 100, // Required
     userId: "user123", // Required
-    paymentId: "payment456", // Optional: unique payment identifier
+    paymentId: "payment456", // Required: unique payment identifier, used to deduplicate transactions
     type: "FIRST_PAYMENT", // Optional: FIRST_PAYMENT | WALLET_TOPUP | FUNDS_WITHDRAWAL |
                            // SUBSCRIPTION_CREATED | SUBSCRIPTION_RENEWED | ONE_TIME | RECURRING | DEFAULT
     status: "PAYMENT_COMPLETED", // Optional: PAYMENT_INITIATED | PAYMENT_COMPLETED |
@@ -98,9 +98,14 @@ Revenue is only stored for attributed users - `signup` must run first.
 ```typescript
 await linkrunner.trackEvent(
     "purchase_initiated", // Event name
-    { product_id: "12345", category: "electronics", amount: 99.99 } // Optional payload
+    { product_id: "12345", category: "electronics", amount: 99.99 }, // Optional payload
+    "order_12345" // Optional: your own unique event identifier (string or number), for dedup/correlation
 );
 ```
+
+The third argument, `eventId`, is optional and lets you pass your own unique
+identifier for the event - useful for deduplication and correlating with your
+backend.
 
 To share revenue with ad networks (Google Ads, Meta) for optimization,
 include a numeric `amount` field in the event data:
@@ -137,6 +142,11 @@ Returns:
         groupName: string;
         assetName: string;
         assetGroupName: string;
+        adNetworkCampaignId?: string; // Ad network campaign ID
+        adSetId?: string; // Ad set ID
+        adSetName?: string; // Ad set name
+        adCreativeId?: string; // Ad creative ID
+        adCreativeName?: string; // Ad creative name
     }
 }
 ```

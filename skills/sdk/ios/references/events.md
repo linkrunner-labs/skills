@@ -96,7 +96,7 @@ Revenue is only stored for attributed users - `signup` must run first.
 try await LinkrunnerSDK.shared.capturePayment(
     amount: 99.99,        // Payment amount
     userId: "user123",    // User identifier
-    paymentId: "payment456", // Optional: unique payment identifier
+    paymentId: "payment456", // Required: unique payment identifier
     type: .firstPayment,  // Optional
     status: .completed,   // Optional
     eventData: [:]        // Optional: ecommerce/custom event data
@@ -130,7 +130,8 @@ try await LinkrunnerSDK.shared.trackEvent(
         "product_id": "12345",
         "category": "electronics",
         "amount": 99.99 // number, not string - needed for ad-network revenue sharing
-    ]
+    ],
+    eventId: "order_12345" // Optional: your own unique event identifier, useful for deduplication and correlating with your backend
 )
 ```
 
@@ -154,22 +155,37 @@ if let deeplink = attributionData.deeplink {
 ```
 
 ```swift
-struct AttributionData: Codable, Sendable {
-    let deeplink: String?
-    let campaignData: CampaignData
-    let attributionSource: String
+public struct LRAttributionDataResponse: Codable, Sendable {
+    public let deeplink: String?
+    public let campaignData: CampaignData?
+    public let attributionSource: String
 }
 
-struct CampaignData: Codable, Sendable {
-    let id: String
-    let name: String
-    let adNetwork: String?
-    let type: String
-    let installedAt: String
-    let storeClickAt: String?
-    let groupName: String
-    let assetName: String
-    let assetGroupName: String
+public struct CampaignData: Codable, Sendable {
+    public let id: String
+    public let name: String
+    public let type: CampaignType        // .organic ("ORGANIC") | .inorganic ("INORGANIC")
+    public let adNetwork: AdNetwork?      // .meta ("META") | .google ("GOOGLE")
+    public let groupName: String?
+    public let assetGroupName: String?
+    public let adNetworkCampaignId: String? // Ad network campaign ID
+    public let adSetId: String?             // Ad set ID
+    public let adSetName: String?           // Ad set name
+    public let adCreativeId: String?        // Ad creative ID
+    public let adCreativeName: String?      // Ad creative name
+    public let assetName: String?
+    public let installedAt: Date?
+    public let storeClickAt: Date?
+}
+
+public enum CampaignType: String, Codable, Sendable {
+    case organic = "ORGANIC"
+    case inorganic = "INORGANIC"
+}
+
+public enum AdNetwork: String, Codable, Sendable {
+    case meta = "META"
+    case google = "GOOGLE"
 }
 ```
 

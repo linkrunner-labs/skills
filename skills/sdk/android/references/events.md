@@ -68,7 +68,7 @@ Revenue is only stored for attributed users - `signup` must run first.
 
 ```kotlin
 val paymentData = CapturePaymentRequest(
-    paymentId = "payment_123", // Optional: unique payment identifier
+    paymentId = "payment_123", // Required: unique payment identifier
     userId = "user123", // Required
     amount = 99.99, // Required
     type = PaymentType.FIRST_PAYMENT, // Optional, defaults to DEFAULT
@@ -101,7 +101,10 @@ of that user's payments are removed.
 
 ## Custom / ecommerce events
 
-Events are only stored for attributed users - `signup` must run first.
+Events are only stored for attributed users - `signup` must run first. From
+**Android SDK v3.9.0**, `trackEvent` automatically includes the `user_id` set
+via `signup()`/`setUserData()` - no need to pass it manually. Events tracked
+before signup go out without a `user_id`.
 
 ```kotlin
 LinkRunner.getInstance().trackEvent(
@@ -109,9 +112,14 @@ LinkRunner.getInstance().trackEvent(
     eventData = mapOf(
         "product_id" to "12345",
         "amount" to 99.99 // pass amount as a number for ad-network revenue sharing (Google/Meta)
-    )
+    ),
+    eventId = "order_12345" // Optional: your own unique event identifier, useful for deduplication and correlating with your backend
 )
 ```
+
+**Parameters:** `eventName` (required), `eventData` (optional), `eventId`
+(optional) - your own unique identifier for the event, useful for
+deduplication and correlating with your backend.
 
 For Meta Catalog Sales sync, `eventData` needs Meta's ecommerce fields
 (`content_ids`, `contents`, `content_type`, `currency`, `value`,
@@ -127,7 +135,9 @@ for the full field reference. Purchases go through `capturePayment` (with
 val attributionDataResult = LinkRunner.getInstance().getAttributionData()
 attributionDataResult.onSuccess { attributionData ->
     // attributionData.deeplink      -> resolved destination (nullable)
-    // attributionData.campaignData  -> id, name, adNetwork, type, installedAt, ...
+    // attributionData.campaignData  -> id, name, adNetwork, type, installedAt,
+    //   storeClickAt, groupName, assetName, assetGroupName, adNetworkCampaignId,
+    //   adSetId, adSetName, adCreativeId, adCreativeName
 }
 ```
 
@@ -140,7 +150,8 @@ deep linking / routing a new user to the right screen after first open.
 - `LinkRunner.getInstance().setAdditionalData(IntegrationData(clevertapId = "..."))` -
   set a third-party integration id (e.g. CleverTap) after the fact.
 - `LinkRunner.getInstance().enablePIIHashing(true)` - hash name/email/phone
-  with SHA-256 before sending, for privacy-sensitive apps.
+  with SHA-256 before sending, for privacy-sensitive apps. Check the current
+  state with `LinkRunner.getInstance().isPIIHashingEnabled()`.
 - `LinkRunner.getInstance().setPushToken(fcmToken)` - required for [uninstall
   tracking](https://docs.linkrunner.io/sdk/android#uninstall-tracking) via
   Firebase Cloud Messaging; call from `onNewToken` and on app start.

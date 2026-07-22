@@ -72,7 +72,7 @@ const setUserData = async () => {
 await linkrunner.capturePayment({
   amount: 100,             // required
   userId: "user123",       // required
-  paymentId: "payment456", // optional - unique payment identifier
+  paymentId: "payment456", // required - unique payment identifier, used to deduplicate transactions
   type: "FIRST_PAYMENT",   // optional - FIRST_PAYMENT / SUBSCRIPTION_CREATED / ONE_TIME / RECURRING / DEFAULT / ...
   status: "PAYMENT_COMPLETED", // optional - defaults to PAYMENT_COMPLETED
   eventData: { /* ecommerce/custom payload, see below */ },
@@ -93,12 +93,16 @@ of that user's payments are removed.
 ```javascript
 await linkrunner.trackEvent(
   "purchase_initiated",                 // event name
-  { product_id: "12345", category: "electronics", amount: 99.99 } // optional payload
+  { product_id: "12345", category: "electronics", amount: 99.99 }, // optional payload
+  "order_12345" // optional - your own unique event identifier (string or number)
 );
 ```
 
 Include `amount` as a **number** (not a string) in the event data to share
 revenue with ad networks like Google Ads and Meta.
+
+`eventId` is optional and useful for deduplication and correlating the event
+with your backend.
 
 Ecommerce events (`AddToCart`, `ViewContent`, etc.) go through the same
 `trackEvent` call with a Meta-shaped `eventData` (`content_ids`, `contents`,
@@ -113,8 +117,47 @@ through `capturePayment` with the same ecommerce payload in `eventData`, plus
 const attributionData = await linkrunner.getAttributionData();
 // attributionData.deeplink                 -> resolved destination (optional)
 // attributionData.campaignData.id / .name / .type / .adNetwork
+// attributionData.campaignData.adNetworkCampaignId / .adSetId / .adSetName / .adCreativeId / .adCreativeName
 ```
 
 Use `getAttributionData()` (not `init`'s return) to read attribution and the
 deeplink that led to the install - useful for deferred deep linking / routing a
 new user to the right screen after first open.
+
+## Uninstall tracking (setPushToken)
+
+Requires `rn-linkrunner` v2.8.0+, Firebase Cloud Messaging on Android
+([react-native-firebase](https://rnfirebase.io/messaging/usage)), and an app
+registered with APNs on iOS. In the Linkrunner dashboard, go to **Settings >
+Uninstall Tracking** and configure the Android tab (Firebase Project ID) and
+the iOS tab (APNs p8 key, Key ID, Bundle ID, Team ID).
+
+```javascript
+import messaging from '@react-native-firebase/messaging';
+import linkrunner from 'rn-linkrunner';
+import { Platform } from 'react-native';
+
+const token = Platform.OS === 'ios'
+  ? await messaging().getAPNSToken()
+  : await messaging().getToken();
+if (token) {
+  await linkrunner.setPushToken(token);
+}
+
+// re-send on refresh (Android)
+messaging().onTokenRefresh(async (token) => {
+  await linkrunner.setPushToken(token);
+});
+```
+
+In your FCM message handler, ignore silent uninstall-tracking pings so they
+don't surface as visible notifications:
+
+```javascript
+messaging().onMessage(async (remoteMessage) => {
+  if (remoteMessage.data && remoteMessage.data['lr-uninstall-tracking']) {
+    return; // silent notification for uninstall tracking, ignore
+  }
+  // handle other messages here
+});
+```
