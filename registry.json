@@ -130,6 +130,17 @@
       "description": "Write a Linkrunner webhook receiver in your backend: accept install/signup POSTs, verify the linkrunner-key header, handle device ids (install) and user identity (signup) idempotently, and ack 2xx fast.",
       "docs": "https://docs.linkrunner.io/features/webhooks",
       "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-meta-install-referrer",
+      "category": "ad-networks",
+      "slug": "meta-install-referrer",
+      "aliases": ["meta-install-referrer", "meta-referrer", "meta-view-through", "install-referrer"],
+      "path": "skills/ad-networks/meta-install-referrer",
+      "title": "Linkrunner - Meta Install Referrer (view-through)",
+      "description": "Set up Meta Install Referrer so Linkrunner reads Meta ad campaign metadata from the device to improve Meta attribution, including view-through installs. Android only; configures the Facebook App ID in AndroidManifest.xml. Works across the native Android, Flutter, and React Native SDKs.",
+      "docs": "https://docs.linkrunner.io/features/meta-install-referrer",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
     }
   ]
 }
