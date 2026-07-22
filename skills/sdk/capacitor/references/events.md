@@ -38,6 +38,18 @@ const onSignup = async () => {
 };
 ```
 
+## setCustomerUserId (set your own user id)
+
+Attach your own user identifier to the device, ideally right after `init()`. Once
+set, it is stored securely on-device and automatically attached to every event you
+track, so you do not pass it on each `trackEvent`. Calling it again with a
+different id updates the stored value; the same id is a no-op. `signup()` and
+`setUserData()` also update it.
+
+```javascript
+await linkrunner.setCustomerUserId('f47ac10b-58cc-4372-a567-0e02b2c3d479');
+```
+
 ## setUserData (optional top-up)
 
 Call every time the app opens and the user is logged in, to refresh details
