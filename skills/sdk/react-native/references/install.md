@@ -57,7 +57,78 @@ Expo Go. See https://docs.expo.dev/develop/development-builds/introduction/.
 (An Expo managed project using the config plugin is the `linkrunner-expo`
 skill, not this one.)
 
-## 5. Initialize (required, before anything else)
+## 5. Google Integrated Conversion Measurement (optional)
+
+ICM recovers Google App Campaign installs on iOS that Google cannot attribute
+because there is no click identifier and no IDFA to match on - the normal
+state once a user declines App Tracking Transparency. Set this up if the app
+runs Google App Campaigns. Requires **`rn-linkrunner` 3.1.0+**. See
+[Google ICM](https://docs.linkrunner.io/features/google-icm) for how it works
+and the required Google Ads iOS link ID (separate from this SDK config).
+
+### Add Google's On-Device Measurement SDK (iOS)
+
+`rn-linkrunner` does not bundle this - it is detected at runtime, so apps that
+skip ICM carry none of its weight. Already on the Firebase iOS SDK 11.14.0+?
+The `FirebaseAnalytics` pod already brings it in - skip this step. Otherwise
+add it inside the app target in `ios/Podfile`:
+
+```ruby
+target 'YourApp' do
+  # ...your existing config
+  pod 'GoogleAdsOnDeviceConversion'
+end
+```
+
+Then `cd ios && pod install`. CocoaPods adds the `-ObjC` and `-lc++` linker
+flags automatically - no Build Settings changes needed.
+
+### Report consent
+
+Google's App Conversion API treats consent as required whenever its value is
+known. Call `setConsent` **before** `init`, and again whenever the user's
+choice changes. This applies on both iOS and Android - Android has no ODM SDK
+to add, but its installs reach Google through the App Conversion API, which
+reads the same signals:
+
+```javascript
+import linkrunner from "rn-linkrunner";
+
+linkrunner.setConsent({
+    isEEA: "granted",
+    hasConsentForDataUsage: "granted",
+    hasConsentForAdsPersonalization: "denied",
+});
+
+await linkrunner.init("YOUR_PROJECT_TOKEN");
+```
+
+| Parameter | Meaning |
+| --- | --- |
+| `isEEA` | European regulations apply to this user (the EEA, the UK, or Switzerland) |
+| `hasConsentForDataUsage` | The user agreed to their data being sent to Google for advertising |
+| `hasConsentForAdsPersonalization` | The user agreed to their data being used to personalize ads |
+
+Each takes `"granted"`, `"denied"`, or `"unknown"`. Anything omitted or left
+`"unknown"` is dropped from the payload rather than sent as a denial - never
+map `unknown` to `granted`. **For users outside the EEA/UK/Switzerland, report
+`isEEA` as denied and leave the other two unset.** Consent persists between
+launches, so call `setConsent` again whenever it changes or the previous value
+keeps being sent. See
+[Send Consent](https://docs.linkrunner.io/features/send-consent).
+
+### Verify
+
+With debug mode on, look for this line in the Xcode console:
+
+```
+Linkrunner: odm_available=true odm_fetch_result=success odm_fetch_latency_ms=124
+```
+
+`odm_available=false odm_fetch_result=unavailable` means Google's SDK is not
+linked - confirm `pod install` picked up `GoogleAdsOnDeviceConversion`.
+
+## 6. Initialize (required, before anything else)
 
 `init()` returns nothing. Attribution + deeplink data comes from
 `getAttributionData()` later (see `references/events.md`).
@@ -84,7 +155,7 @@ const init = async () => {
 **SDK signing** (optional, more secure): `secretKey` + `keyId` from
 dashboard → Settings → SDK Signing.
 
-## 6. Verify install
+## 7. Verify install
 
 - `npm install`/`yarn` resolves cleanly, `pod install` succeeds with no errors
 - App builds on both platforms

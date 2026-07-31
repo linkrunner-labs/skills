@@ -116,7 +116,48 @@ import io.linkrunner.sdk.LinkRunner
 import io.linkrunner.sdk.LinkRunner;
 ```
 
-## 6. Initialize (required, before anything else)
+## 6. Google Ads consent
+
+If the app runs Google App Campaigns, report the user's consent choices.
+Google's App Conversion API treats these values as required whenever they are
+known and reads them when it matches installs, so an install with no consent
+state attached is harder to attribute - this matters most for users in the
+EEA, UK, and Switzerland. Requires **`android-sdk` 4.1.0+**. There is no extra
+SDK to add here - Android installs reach Google through the App Conversion
+API, which reads these signals; the on-device SDK in
+[Google ICM](https://docs.linkrunner.io/features/google-icm) is iOS only.
+
+Call `setConsent` **before** `init`, and again whenever the user's choice
+changes:
+
+```kotlin
+import io.linkrunner.sdk.models.ConsentStatus
+import io.linkrunner.sdk.models.LinkrunnerConsent
+
+LinkRunner.getInstance().setConsent(
+    LinkrunnerConsent(
+        isEEA = ConsentStatus.GRANTED,
+        hasConsentForDataUsage = ConsentStatus.GRANTED,
+        hasConsentForAdsPersonalization = ConsentStatus.DENIED
+    )
+)
+```
+
+| Parameter | Meaning |
+| --- | --- |
+| `isEEA` | European regulations apply to this user (the EEA, the UK, or Switzerland) |
+| `hasConsentForDataUsage` | The user agreed to their data being sent to Google for advertising |
+| `hasConsentForAdsPersonalization` | The user agreed to their data being used to personalize ads |
+
+Each takes `ConsentStatus.GRANTED`, `.DENIED`, or `.UNKNOWN`. Anything left
+`UNKNOWN` is dropped from the payload rather than sent as a denial - never map
+`unknown` to `granted`. **For users outside the EEA/UK/Switzerland, report
+`isEEA` as denied and leave the other two unset.** Consent persists between
+launches, so call `setConsent` again whenever it changes or the previous value
+keeps being sent. See
+[Send Consent](https://docs.linkrunner.io/features/send-consent).
+
+## 7. Initialize (required, before anything else)
 
 Call in your `Application` subclass's `onCreate()`. `init()` returns nothing -
 attribution + deeplink data comes from `getAttributionData()` later (see
@@ -159,7 +200,7 @@ Register the class in `AndroidManifest.xml` if it isn't already:
 **SDK signing** (optional, more secure): `secretKey` + `keyId` from
 dashboard → Settings → SDK Signing.
 
-## 7. Verify install
+## 8. Verify install
 
 - Gradle sync resolves the dependency cleanly
 - App builds and launches

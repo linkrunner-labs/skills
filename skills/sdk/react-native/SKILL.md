@@ -44,6 +44,7 @@ editing** - do not paste snippets blindly.
 | "Set up deep links" / "links open the browser not my app" | `references/deep-linking.md` + run `scripts/verify-deeplinks.sh` |
 | "Track purchases / events" | `references/events.md` |
 | "Set up uninstall tracking" | `references/events.md` (setPushToken) + configure FCM/APNs in the dashboard under Settings → Uninstall Tracking |
+| "Set up Google ICM / Google Ads attribution" | `references/install.md` (Google Integrated Conversion Measurement section) |
 
 Most first-time integrations need **install → init → signup → handle deeplink**,
 in that order. Deep-link *verification* (assetlinks/AASA) is separate and is
