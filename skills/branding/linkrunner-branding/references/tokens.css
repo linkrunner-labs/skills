@@ -1,0 +1,110 @@
+:root {
+  /* Official brand */
+  --lr-brand-blue: #4d4bf7;
+  --lr-brand-ink: #2b2c2f;
+  --lr-brand-muted: #8b8d98;
+  --lr-brand-canvas: #ffffff;
+
+  /* Gray scale */
+  --lr-gray-0: #ffffff;
+  --lr-gray-25: #f8f8f8;
+  --lr-gray-50: #f9f9fb;
+  --lr-gray-75: #f3f3f6;
+  --lr-gray-100: #e8e8ed;
+  --lr-gray-200: #cdcdd7;
+  --lr-gray-300: #afafb9;
+  --lr-gray-400: #8f8f96;
+  --lr-gray-500: #5d5d64;
+  --lr-gray-600: #41414b;
+  --lr-gray-700: #303037;
+  --lr-gray-800: #212128;
+  --lr-gray-900: #18181e;
+  --lr-gray-1000: #0d0d14;
+
+  /* Blue scale */
+  --lr-blue-25: #f5fbff;
+  --lr-blue-50: #dbf0ff;
+  --lr-blue-100: #c0d1ff;
+  --lr-blue-200: #97abff;
+  --lr-blue-300: #7382ff;
+  --lr-blue-400: #585cff;
+  --lr-blue-500: #4d4bf7;
+  --lr-blue-600: #2d2b9f;
+  --lr-blue-700: #1b1c62;
+  --lr-blue-800: #0a0c2f;
+  --lr-blue-900: #010109;
+
+  /* Semantic light theme */
+  --lr-bg-primary: var(--lr-gray-0);
+  --lr-bg-secondary: var(--lr-gray-50);
+  --lr-bg-tertiary: var(--lr-gray-100);
+  --lr-bg-elevated: var(--lr-gray-75);
+  --lr-text-primary: var(--lr-gray-700);
+  --lr-text-secondary: var(--lr-gray-600);
+  --lr-text-tertiary: var(--lr-gray-400);
+  --lr-text-inverted: var(--lr-gray-0);
+  --lr-border-light: rgb(13 13 13 / 5%);
+  --lr-border-default: rgb(13 13 13 / 10%);
+  --lr-border-heavy: rgb(13 13 13 / 20%);
+  --lr-action-default: var(--lr-blue-500);
+  --lr-action-hover: var(--lr-blue-400);
+  --lr-action-pressed: var(--lr-blue-300);
+  --lr-action-on-surface: #ffffff;
+
+  /* Spacing */
+  --lr-space-1: 0.25rem;
+  --lr-space-2: 0.5rem;
+  --lr-space-3: 0.75rem;
+  --lr-space-4: 1rem;
+  --lr-space-5: 1.25rem;
+  --lr-space-6: 1.5rem;
+  --lr-space-8: 2rem;
+  --lr-space-10: 2.5rem;
+  --lr-space-12: 3rem;
+  --lr-space-16: 4rem;
+  --lr-space-20: 5rem;
+  --lr-space-24: 6rem;
+  --lr-space-32: 8rem;
+
+  /* Radius */
+  --lr-radius-xs: 0.125rem;
+  --lr-radius-sm: 0.25rem;
+  --lr-radius-md: 0.5rem;
+  --lr-radius-lg: 0.75rem;
+  --lr-radius-xl: 1rem;
+  --lr-radius-2xl: 1.5rem;
+  --lr-radius-full: 9999px;
+
+  /* Motion */
+  --lr-ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --lr-ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+  --lr-ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+  --lr-duration-fast: 150ms;
+  --lr-duration-base: 200ms;
+  --lr-duration-medium: 300ms;
+  --lr-duration-slow: 400ms;
+  --lr-duration-slower: 500ms;
+
+  /* Fonts for new standalone surfaces */
+  --lr-font-sans: "Geist Sans", Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --lr-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Use only where the target surface explicitly supports dark mode. */
+[data-theme="dark"],
+.dark {
+  --lr-bg-primary: var(--lr-gray-1000);
+  --lr-bg-secondary: var(--lr-gray-900);
+  --lr-bg-tertiary: var(--lr-gray-800);
+  --lr-bg-elevated: var(--lr-gray-800);
+  --lr-text-primary: var(--lr-gray-0);
+  --lr-text-secondary: var(--lr-gray-200);
+  --lr-text-tertiary: var(--lr-gray-400);
+  --lr-text-inverted: var(--lr-gray-1000);
+  --lr-border-light: rgb(255 255 255 / 5%);
+  --lr-border-default: rgb(255 255 255 / 10%);
+  --lr-border-heavy: rgb(255 255 255 / 20%);
+  --lr-action-default: var(--lr-blue-500);
+  --lr-action-hover: var(--lr-blue-400);
+  --lr-action-pressed: var(--lr-blue-300);
+}

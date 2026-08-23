@@ -1,7 +1,7 @@
 {
   "name": "@linkrunner/skills",
-  "version": "0.4.1",
-  "description": "Installable Agent Skills for integrating the Linkrunner SDK and deep linking into your app, for AI coding agents (Claude Code, Cursor, Windsurf, Copilot).",
+  "version": "0.5.0",
+  "description": "Installable Agent Skills for Linkrunner SDK integration, troubleshooting, instrumentation, and brand-consistent design.",
   "type": "module",
   "bin": {
     "linkrunner-skills": "bin/cli.mjs"
@@ -19,7 +19,7 @@
   },
   "scripts": {
     "list": "node bin/cli.mjs list",
-    "test": "node bin/cli.mjs add flutter --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add flutter --agent cursor --dir ./.smoke --dry-run"
+    "test": "node bin/cli.mjs add flutter --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add flutter --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent cursor --dir ./.smoke --dry-run"
   },
   "keywords": [
     "linkrunner",
@@ -28,7 +28,9 @@
     "agent-skills",
     "claude-code",
     "cursor",
-    "sdk"
+    "sdk",
+    "branding",
+    "design-system"
   ],
   "repository": {
     "type": "git",

@@ -5,8 +5,9 @@
 [![license](https://img.shields.io/npm/l/@linkrunner/skills.svg)](./LICENSE)
 
 Installable **Agent Skills** that teach your AI coding agent how to integrate the
-[Linkrunner](https://linkrunner.io) attribution SDK and set up deep linking -
-correctly, and with self-verifying checks - instead of following the docs by hand.
+[Linkrunner](https://linkrunner.io) attribution SDK, troubleshoot attribution
+workflows, and design brand-consistent Linkrunner surfaces. Skills include
+self-verifying checks, current references, and canonical brand assets.
 
 Published on npm as **[`@linkrunner/skills`](https://www.npmjs.com/package/@linkrunner/skills)**.
 
@@ -55,6 +56,7 @@ Cross-cutting skills that are not tied to one platform:
 | Deep link troubleshooter | `npx @linkrunner/skills add deep-links` | Diagnoses why Universal Links / App Links open the browser instead of the app and reports the exact fix |
 | Event & revenue instrumentation | `npx @linkrunner/skills add events` | Correct event taxonomy + revenue (dedupe / refunds) + server-side event/revenue APIs |
 | Webhooks receiver | `npx @linkrunner/skills add webhooks` | Writes a webhook endpoint in your backend that verifies the `linkrunner-key` header and handles install/signup payloads |
+| Linkrunner brand system | `npx @linkrunner/skills add branding` | Applies one Linkrunner identity across public marketing, customer product, internal tools, documents, reports, decks, social, and partner surfaces |
 
 Run `npx @linkrunner/skills list` to see everything grouped by category.
 
@@ -75,18 +77,23 @@ Skills are authored to **inspect the project before editing and verify after** -
 the deep-link validator is what turns "I pasted the config" into "the link
 actually opens the app".
 
+The branding skill also ships current SVG and PNG logo files, portable CSS and
+JSON tokens, surface-specific playbooks, a checksum manifest, and a brand review
+checklist.
+
 ## How agent targets are written
 
 | Agent | Written to |
 | --- | --- |
-| Claude Code | `.claude/skills/<id>/` (SKILL.md + references + scripts, verbatim) |
+| Claude Code | `.claude/skills/<id>/` (complete skill folder, including assets and templates) |
 | Cursor | `.cursor/rules/<id>.mdc` |
 | Windsurf | `.windsurf/rules/<id>.md` |
 | Copilot | `.github/instructions/<id>.instructions.md` |
 | Generic | `AGENTS.md` (idempotent section) |
 
-Single-file targets get the references inlined and the validator scripts dropped
-under `.linkrunner/<id>/scripts/`.
+Single-file targets get Markdown references inlined. Supporting references,
+assets, templates, and scripts are also copied under `.linkrunner/<id>/` so the
+installed skill remains complete.
 
 ## Contributing / adding a platform
 
