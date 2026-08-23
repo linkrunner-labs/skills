@@ -141,6 +141,17 @@
       "description": "Set up Meta Install Referrer so Linkrunner reads Meta ad campaign metadata from the device to improve Meta attribution, including view-through installs. Android only; configures the Facebook App ID in AndroidManifest.xml. Works across the native Android, Flutter, and React Native SDKs.",
       "docs": "https://docs.linkrunner.io/features/meta-install-referrer",
       "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-branding",
+      "category": "branding",
+      "slug": "branding",
+      "aliases": ["brand", "branding", "brand-system", "design-system", "logo", "visual-design"],
+      "path": "skills/branding/linkrunner-branding",
+      "title": "Linkrunner - brand system",
+      "description": "Design or review consistent Linkrunner interfaces and brand materials across public marketing, customer product, internal tools, documents, reports, decks, social, and partner surfaces. Use when asked to create Linkrunner-branded UI, choose logo assets, apply brand colors or typography, review brand consistency, or make any Linkrunner-facing visual artifact.",
+      "docs": "https://linkrunner.io/press",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
     }
   ]
 }

@@ -1,7 +1,9 @@
 # Authoring a Linkrunner skill
 
-Each platform is one skill folder under `skills/sdk/<platform>/`. The Flutter
-skill (`skills/sdk/flutter/`) is the reference implementation - copy its shape.
+SDK platforms live under `skills/sdk/<platform>/`. The Flutter skill
+(`skills/sdk/flutter/`) is the reference implementation for SDK integrations.
+Cross-cutting skills use a category folder such as `skills/events/`,
+`skills/troubleshoot/`, or `skills/branding/`.
 
 ## Rules
 
@@ -32,6 +34,10 @@ skill (`skills/sdk/flutter/`) is the reference implementation - copy its shape.
 | `references/deep-linking.md` | HTTP/HTTPS (App Links / Universal Links) + custom schemes + debugging |
 | `references/events.md` | identify/signup, events, revenue, attribution read |
 | `scripts/verify-deeplinks.sh` | deep-link verification check (shared, framework-agnostic) |
+
+Skills may also include `assets/`, `templates/`, and non-Markdown files under
+`references/`. The installer preserves these resources under the native skill
+folder for Claude Code and under `.linkrunner/<id>/` for single-file targets.
 
 The `verify-deeplinks.sh` validator is identical across the mobile platforms
 (verification is native to Android/iOS), so copy it verbatim from Flutter. Web

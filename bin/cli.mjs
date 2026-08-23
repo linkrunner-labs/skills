@@ -3,13 +3,13 @@
 // Zero-dependency Node ESM so `npx @linkrunner/skills ...` runs anywhere (Node 18+).
 //
 //   npx @linkrunner/skills list
-//   npx @linkrunner/skills add flutter [--agent claude-code|cursor|windsurf|copilot|agents-md]
+//   npx @linkrunner/skills add <skill> [--agent claude-code|cursor|windsurf|copilot|agents-md]
 //                                      [--dir .] [--dry-run]
 //
-// One canonical SKILL.md (+ references + scripts) is compiled to the target
-// agent's native format. Claude Code gets the folder verbatim; single-file
-// agents get the body with references inlined, plus scripts dropped under
-// .linkrunner/<name>/scripts/ so validators stay runnable.
+// One canonical skill folder is compiled to the target agent's native format.
+// Claude Code gets the folder verbatim. Single-file agents get the body with
+// Markdown references inlined, while all supporting resources are copied under
+// .linkrunner/<name>/ so assets, templates, and validators remain available.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -55,19 +55,41 @@ function stripFrontmatter(md) {
   return m ? md.slice(m[0].length).trimStart() : md;
 }
 
+function readSupportFiles(base) {
+  const files = [];
+  function walk(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+      .sort((a, b) => a.name.localeCompare(b.name));
+    for (const entry of entries) {
+      const absolute = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(absolute);
+      } else if (entry.isFile()) {
+        const name = path.relative(base, absolute).split(path.sep).join('/');
+        if (name === 'SKILL.md') continue;
+        files.push({
+          name,
+          content: fs.readFileSync(absolute),
+          exec: name.startsWith('scripts/') && name.endsWith('.sh'),
+        });
+      }
+    }
+  }
+  walk(base);
+  return files;
+}
+
 function readSkill(skill) {
   const base = path.join(ROOT, skill.path);
   const skillMd = fs.readFileSync(path.join(base, 'SKILL.md'), 'utf8');
-  const refDir = path.join(base, 'references');
-  const scriptDir = path.join(base, 'scripts');
-  const references = fs.existsSync(refDir)
-    ? fs.readdirSync(refDir).filter((f) => f.endsWith('.md')).sort()
-        .map((f) => ({ name: f, content: fs.readFileSync(path.join(refDir, f), 'utf8') }))
-    : [];
-  const scripts = fs.existsSync(scriptDir)
-    ? fs.readdirSync(scriptDir).map((f) => ({ name: f, content: fs.readFileSync(path.join(scriptDir, f), 'utf8') }))
-    : [];
-  return { base, skillMd, references, scripts };
+  const supportFiles = readSupportFiles(base);
+  const references = supportFiles
+    .filter((f) => f.name.startsWith('references/') && f.name.endsWith('.md'))
+    .map((f) => ({ name: path.basename(f.name), content: f.content.toString('utf8') }));
+  const scripts = supportFiles
+    .filter((f) => f.name.startsWith('scripts/'))
+    .map((f) => ({ name: path.basename(f.name), content: f.content }));
+  return { base, skillMd, references, scripts, supportFiles };
 }
 
 // Body used by single-file targets: SKILL.md minus frontmatter, references inlined.
@@ -76,28 +98,28 @@ function inlinedBody(skill, s) {
   for (const ref of s.references) {
     body += `\n\n---\n\n<!-- reference: ${ref.name} -->\n\n${ref.content.trim()}\n`;
   }
+  if (s.supportFiles.length) {
+    body += `\n\n---\n\nSupporting references, assets, templates, and scripts were installed under \`.linkrunner/${skill.id}/\`. Resolve any relative \`references/...\`, \`assets/...\`, \`templates/...\`, or \`scripts/...\` path from that directory.\n`;
+  }
   if (s.scripts.length) {
-    body += `\n\n---\n\nValidator scripts were installed under \`.linkrunner/${skill.id}/scripts/\` in this project. Run them from the project root, e.g. \`bash .linkrunner/${skill.id}/scripts/${s.scripts[0].name}\`.\n`;
+    body += `\nValidator scripts can be run from the project root, e.g. \`bash .linkrunner/${skill.id}/scripts/${s.scripts[0].name}\`.\n`;
   }
   return body;
 }
 
-function writeFile(target, content, plan) {
-  plan.push({ target, bytes: Buffer.byteLength(content) });
+function writeFile(target, content, plan, exec = false) {
+  const bytes = Buffer.isBuffer(content) ? content.length : Buffer.byteLength(content);
+  plan.push({ target, bytes, exec });
   if (!plan.dryRun) {
     fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.writeFileSync(target, content);
+    fs.writeFileSync(target, content, { mode: exec ? 0o755 : 0o644 });
   }
 }
 
-function copyScripts(dir, skill, s, plan) {
-  for (const sc of s.scripts) {
-    const target = path.join(dir, '.linkrunner', skill.id, 'scripts', sc.name);
-    plan.push({ target, bytes: Buffer.byteLength(sc.content), exec: sc.name.endsWith('.sh') });
-    if (!plan.dryRun) {
-      fs.mkdirSync(path.dirname(target), { recursive: true });
-      fs.writeFileSync(target, sc.content, { mode: sc.name.endsWith('.sh') ? 0o755 : 0o644 });
-    }
+function copySupportFiles(dir, skill, s, plan) {
+  const dest = path.join(dir, '.linkrunner', skill.id);
+  for (const file of s.supportFiles) {
+    writeFile(path.join(dest, file.name), file.content, plan, file.exec);
   }
 }
 
@@ -115,29 +137,22 @@ function install(skill, agent, dir, dryRun) {
   const plan = []; plan.dryRun = dryRun;
 
   if (agent === 'claude-code') {
-    // Verbatim folder - Claude Code supports SKILL.md + references + scripts natively.
+    // Verbatim folder: Claude Code supports the complete skill structure.
     const dest = path.join(dir, '.claude', 'skills', skill.id);
     writeFile(path.join(dest, 'SKILL.md'), s.skillMd, plan);
-    for (const ref of s.references) writeFile(path.join(dest, 'references', ref.name), ref.content, plan);
-    for (const sc of s.scripts) {
-      plan.push({ target: path.join(dest, 'scripts', sc.name), bytes: Buffer.byteLength(sc.content), exec: sc.name.endsWith('.sh') });
-      if (!dryRun) {
-        fs.mkdirSync(path.join(dest, 'scripts'), { recursive: true });
-        fs.writeFileSync(path.join(dest, 'scripts', sc.name), sc.content, { mode: sc.name.endsWith('.sh') ? 0o755 : 0o644 });
-      }
-    }
+    for (const file of s.supportFiles) writeFile(path.join(dest, file.name), file.content, plan, file.exec);
   } else if (agent === 'cursor') {
     const body = fm({ description: skill.description, globs: '', alwaysApply: false }) + '\n' + inlinedBody(skill, s);
     writeFile(path.join(dir, '.cursor', 'rules', `${skill.id}.mdc`), body, plan);
-    copyScripts(dir, skill, s, plan);
+    copySupportFiles(dir, skill, s, plan);
   } else if (agent === 'windsurf') {
     const body = fm({ trigger: 'model_decision', description: skill.description }) + '\n' + inlinedBody(skill, s);
     writeFile(path.join(dir, '.windsurf', 'rules', `${skill.id}.md`), body, plan);
-    copyScripts(dir, skill, s, plan);
+    copySupportFiles(dir, skill, s, plan);
   } else if (agent === 'copilot') {
     const body = fm({ applyTo: '**', description: skill.description }) + '\n' + inlinedBody(skill, s);
     writeFile(path.join(dir, '.github', 'instructions', `${skill.id}.instructions.md`), body, plan);
-    copyScripts(dir, skill, s, plan);
+    copySupportFiles(dir, skill, s, plan);
   } else if (agent === 'agents-md') {
     const start = `<!-- linkrunner:${skill.id}:start -->`;
     const end = `<!-- linkrunner:${skill.id}:end -->`;
@@ -147,7 +162,7 @@ function install(skill, agent, dir, dryRun) {
     const re = new RegExp(`${start}[\\s\\S]*?${end}`);
     existing = re.test(existing) ? existing.replace(re, section) : `${existing.trimEnd()}\n\n${section}\n`;
     writeFile(file, existing.trimStart(), plan);
-    copyScripts(dir, skill, s, plan);
+    copySupportFiles(dir, skill, s, plan);
   }
   return plan;
 }
@@ -171,7 +186,7 @@ function cmdList() {
 
 function cmdAdd(args) {
   const query = args._[0];
-  if (!query) die('specify a platform, e.g. `add flutter`. Run `list` to see options.');
+  if (!query) die('specify a skill, e.g. `add flutter` or `add branding`. Run `list` to see options.');
   const skill = resolveSkill(query);
   if (!skill) die(`unknown skill "${query}". Run \`npx @linkrunner/skills list\`.`);
 
@@ -208,6 +223,6 @@ const args = parseArgs(rest);
 if (cmd === 'list' || cmd === 'ls') cmdList();
 else if (cmd === 'add' || cmd === 'install') cmdAdd(args);
 else {
-  console.log(`${c.b}@linkrunner/skills${c.n}\n\n  npx @linkrunner/skills list\n  npx @linkrunner/skills add <platform> [--agent <agent>] [--dir <path>] [--dry-run]\n\nagents: ${Object.keys(AGENTS).join(', ')}`);
+  console.log(`${c.b}@linkrunner/skills${c.n}\n\n  npx @linkrunner/skills list\n  npx @linkrunner/skills add <skill> [--agent <agent>] [--dir <path>] [--dry-run]\n\nagents: ${Object.keys(AGENTS).join(', ')}`);
   if (cmd && cmd !== 'help' && cmd !== '--help' && cmd !== '-h') process.exit(1);
 }

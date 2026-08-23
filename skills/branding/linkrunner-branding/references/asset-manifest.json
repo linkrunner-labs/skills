@@ -1,0 +1,817 @@
+{
+  "schemaVersion": 1,
+  "brand": "Linkrunner",
+  "auditedAt": "2026-08-23T13:02:31Z",
+  "officialPressPage": "https://linkrunner.io/press",
+  "officialPressKit": "https://linkrunner.io/brand/linkrunner-press-kit.zip",
+  "findings": {
+    "suppliedPngCount": 17,
+    "exactLiveCanonicalPngMatches": 9,
+    "referenceOnlyPngCount": 8,
+    "canonicalBlue": "#4D4BF7",
+    "canonicalInk": "#2B2C2F",
+    "legacyBlueDoNotUse": "#403DE8",
+    "referenceOnlyHostingFinding": "The eight additional supplied PNGs are not linked from the live /press page and are not present in the live official press-kit ZIP as audited."
+  },
+  "assets": [
+    {
+      "file": "assets/canonical/linkrunner-logo-ink.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-logo-black.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-262_fead38.png",
+      "sha256": "f57cd22b17669b65a8d72a50b643f7808f13ac9c4ca157c7e430742022aa48a2",
+      "width": 2400,
+      "height": 348,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#2B2C2F",
+          "rgba": [
+            43,
+            44,
+            47,
+            255
+          ],
+          "pixels": 246945
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-logo-color.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-logo-color-2026-06-30.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-360_a0e998.png",
+      "sha256": "ee2ac3b135ba59c93fad87f836ec376f6c6d9f9f3c625370d3a16388f2d8ffb4",
+      "width": 2400,
+      "height": 348,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#4D4BF7",
+          "rgba": [
+            77,
+            75,
+            247,
+            255
+          ],
+          "pixels": 246945
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-logo-white.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-logo-white.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-402_35cab0.png",
+      "sha256": "453222dbce22f814a61c65630507dd5b553feccdac96733c5647251fd6f85c62",
+      "width": 2400,
+      "height": 348,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 246945
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-mark-ink.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-mark-black.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-448_618d67.png",
+      "sha256": "ee66863474d05bcfeed19a2da8cb22d94bddb5f59084679821b38517fc919a16",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#2B2C2F",
+          "rgba": [
+            43,
+            44,
+            47,
+            255
+          ],
+          "pixels": 557040
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-mark-color.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-mark-color-2026-06-30.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-491_8e9cd2.png",
+      "sha256": "5f8417718df5d8ce1a7580cf59abb89e0c6f2ceeae765fe81c1684c532226f4d",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#4D4BF7",
+          "rgba": [
+            77,
+            75,
+            247,
+            255
+          ],
+          "pixels": 557040
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-mark-white.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-mark-white.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-531_7365d1.png",
+      "sha256": "b1cd8933fa72c220ed25ce4e5a06db7c3ca22f708a7942d891c19360ec7a64bc",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 557040
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-wordmark-ink.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-wordmark-black.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-573_ae1302.png",
+      "sha256": "f33b071dd726702ee02076fcc2dda7884e54cdf55b01e17beefb2fb5837435c8",
+      "width": 2400,
+      "height": 351,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#2B2C2F",
+          "rgba": [
+            43,
+            44,
+            47,
+            255
+          ],
+          "pixels": 351471
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-wordmark-color.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-wordmark-color-2026-06-30.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-624_4dd617.png",
+      "sha256": "05053360de87a39d07e74abfd6a42e26de8b75b9358323ed1794fa70c59e71c3",
+      "width": 2400,
+      "height": 351,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#4D4BF7",
+          "rgba": [
+            77,
+            75,
+            247,
+            255
+          ],
+          "pixels": 351471
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-wordmark-white.png",
+      "kind": "canonical",
+      "format": "png",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-wordmark-white.png",
+      "originalAttachment": "composer_2026-08-23_12-55-51-669_8eb543.png",
+      "sha256": "b0855fd4ff3ed45987327500bd141f6b95d2d0e2acff2ba40b26b8c1aaed0557",
+      "width": 2400,
+      "height": 351,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 351471
+        }
+      ]
+    },
+    {
+      "file": "assets/canonical/linkrunner-logo-color.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-logo-blue.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 552 80",
+      "bytes": 6285,
+      "sha256": "df69aa87dccf146884734524e55b0bb14fbd7f528d2832638baf6179811ac4da"
+    },
+    {
+      "file": "assets/canonical/linkrunner-logo-ink.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-logo-black.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 552 80",
+      "bytes": 6285,
+      "sha256": "ec3ff92ffcbcbb8758b0743ca10ed12ab973b37df99b6bb2d53b718481fe7fea"
+    },
+    {
+      "file": "assets/canonical/linkrunner-logo-white.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-logo-white.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 552 80",
+      "bytes": 6287,
+      "sha256": "e03805950691c03f21cac19da14e52522909b4351b2a57567ec47fb7585d5970"
+    },
+    {
+      "file": "assets/canonical/linkrunner-mark-color.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-mark-blue.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 340 340",
+      "bytes": 555,
+      "sha256": "58bd38318a05de94d20736e56b74810586450d8a7f1989d4cb3d97e2e25ce4b5"
+    },
+    {
+      "file": "assets/canonical/linkrunner-mark-ink.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-mark-black.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 340 340",
+      "bytes": 555,
+      "sha256": "269670ee6382096d86c8451fb302699b7b43cab2220a440d21683d0d4dd275bb"
+    },
+    {
+      "file": "assets/canonical/linkrunner-mark-white.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-mark-white.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 340 340",
+      "bytes": 557,
+      "sha256": "844dd4bde70c59bf8c08cbbcec9355fdfe31b71d69e22897cb68c768fae55d7a"
+    },
+    {
+      "file": "assets/canonical/linkrunner-wordmark-color.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-wordmark-blue.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 128.591 18.8438",
+      "bytes": 5810,
+      "sha256": "8838cdf71768c5fcff2f760e5531d65c8944124b9e76e4bd5994dcabfb33eacc"
+    },
+    {
+      "file": "assets/canonical/linkrunner-wordmark-ink.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-wordmark-black.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 128.591 18.8438",
+      "bytes": 5810,
+      "sha256": "e1deebf478b7ffc6d66a22e6c05953c74eee1c95f8a71c0a5fe717b22bdd5b83"
+    },
+    {
+      "file": "assets/canonical/linkrunner-wordmark-white.svg",
+      "kind": "canonical",
+      "format": "svg",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/logos/linkrunner-wordmark-white.svg",
+      "contentType": "image/svg+xml",
+      "viewBox": "0 0 128.591 18.8438",
+      "bytes": 5810,
+      "sha256": "240592d66567c2e588e1ce17f8473ad0718e58f33d9af178577e96df42a062eb"
+    },
+    {
+      "file": "assets/canonical/linkrunner-press-kit.zip",
+      "kind": "canonical",
+      "format": "zip",
+      "status": "approved",
+      "officialUrl": "https://linkrunner.io/brand/linkrunner-press-kit.zip",
+      "contentType": "application/zip",
+      "bytes": 146530,
+      "sha256": "988fe4c958f024a5fd79deef3908bc2a7956911f0a47d2bb47f3299caa77079c"
+    },
+    {
+      "file": "assets/reference-only/linkrunner-lockup-card-compact-reference.png",
+      "kind": "reference-only",
+      "format": "png",
+      "status": "not-approved-for-default-use",
+      "officialUrl": null,
+      "originalAttachment": "composer_2026-08-23_12-55-55-084_9256a5.png",
+      "note": "Custom Figma card lockup using the current blue and pale tint. Not linked from the current press page or present in the official press-kit ZIP.",
+      "sha256": "9620ab54ca0c168009df98b964ba7fa3ec5ba734c602abbebc6635f9a007dd8b",
+      "width": 1162,
+      "height": 254,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 224050
+        },
+        {
+          "hex": "#4D4BF7",
+          "rgba": [
+            77,
+            75,
+            247,
+            255
+          ],
+          "pixels": 59578
+        },
+        {
+          "hex": "#DBDBFD",
+          "rgba": [
+            219,
+            219,
+            253,
+            255
+          ],
+          "pixels": 6396
+        },
+        {
+          "hex": "#D3D2FD",
+          "rgba": [
+            211,
+            210,
+            253,
+            255
+          ],
+          "pixels": 603
+        }
+      ]
+    },
+    {
+      "file": "assets/reference-only/linkrunner-mark-card-square-reference.png",
+      "kind": "reference-only",
+      "format": "png",
+      "status": "not-approved-for-default-use",
+      "officialUrl": null,
+      "originalAttachment": "composer_2026-08-23_12-55-55-109_df0d1a.png",
+      "note": "Custom Figma square mark on a white field using the current blue and pale tint. Not linked from the current press page or present in the official press-kit ZIP.",
+      "sha256": "4e59ed3565342625f6b8b574d9c14321f9737a89a47ee00aa679940c7f8c8ec2",
+      "width": 2272,
+      "height": 2272,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 3650660
+        },
+        {
+          "hex": "#4D4BF7",
+          "rgba": [
+            77,
+            75,
+            247,
+            255
+          ],
+          "pixels": 1127426
+        },
+        {
+          "hex": "#DBDBFD",
+          "rgba": [
+            219,
+            219,
+            253,
+            255
+          ],
+          "pixels": 376226
+        },
+        {
+          "hex": "#A6A5FB",
+          "rgba": [
+            166,
+            165,
+            251,
+            255
+          ],
+          "pixels": 3679
+        }
+      ]
+    },
+    {
+      "file": "assets/reference-only/linkrunner-lockup-card-wide-reference.png",
+      "kind": "reference-only",
+      "format": "png",
+      "status": "not-approved-for-default-use",
+      "officialUrl": null,
+      "originalAttachment": "composer_2026-08-23_12-55-55-144_fac446.png",
+      "note": "Custom Figma wide card lockup using the current blue and pale tint. Not linked from the current press page or present in the official press-kit ZIP.",
+      "sha256": "6fba683d48851e3da8ed12cca9e5166b3c722380a19d36abddbccb9c8e23a85c",
+      "width": 1773,
+      "height": 381,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 527367
+        },
+        {
+          "hex": "#4D4BF7",
+          "rgba": [
+            77,
+            75,
+            247,
+            255
+          ],
+          "pixels": 116972
+        },
+        {
+          "hex": "#DBDBFD",
+          "rgba": [
+            219,
+            219,
+            253,
+            255
+          ],
+          "pixels": 12535
+        },
+        {
+          "hex": "#7A78F9",
+          "rgba": [
+            122,
+            120,
+            249,
+            255
+          ],
+          "pixels": 1359
+        }
+      ]
+    },
+    {
+      "file": "assets/reference-only/linkrunner-domain-wordmark-legacy-blue-reference.png",
+      "kind": "reference-only",
+      "format": "png",
+      "status": "not-approved-for-default-use",
+      "officialUrl": null,
+      "originalAttachment": "composer_2026-08-23_12-55-55-179_8dfe5f.png",
+      "note": "Legacy Linkrunner.io domain wordmark using #403DE8. Deprecated for new work.",
+      "sha256": "db23d410d4627c8b70dafe9fc3031bc84f74ec5bb7aea9a093c3503ba1a9243a",
+      "width": 1554,
+      "height": 328,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#403DE8",
+          "rgba": [
+            64,
+            61,
+            232,
+            255
+          ],
+          "pixels": 436914
+        },
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 67255
+        },
+        {
+          "hex": "#CFCFF9",
+          "rgba": [
+            207,
+            207,
+            249,
+            255
+          ],
+          "pixels": 745
+        },
+        {
+          "hex": "#B7B6F6",
+          "rgba": [
+            183,
+            182,
+            246,
+            255
+          ],
+          "pixels": 661
+        }
+      ]
+    },
+    {
+      "file": "assets/reference-only/linkrunner-lr-monogram-legacy-blue-1024-reference.png",
+      "kind": "reference-only",
+      "format": "png",
+      "status": "not-approved-for-default-use",
+      "officialUrl": null,
+      "originalAttachment": "composer_2026-08-23_12-55-55-219_f6e1e8.png",
+      "note": "Legacy LR monogram using #403DE8. Deprecated for new work.",
+      "sha256": "29529fe719019e3b06666e8268953690d6e715d547c4b93409ad17a5bc0ccdeb",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#403DE8",
+          "rgba": [
+            64,
+            61,
+            232,
+            255
+          ],
+          "pixels": 916901
+        },
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 129039
+        },
+        {
+          "hex": "#E7E7FC",
+          "rgba": [
+            231,
+            231,
+            252,
+            255
+          ],
+          "pixels": 438
+        },
+        {
+          "hex": "#B7B6F6",
+          "rgba": [
+            183,
+            182,
+            246,
+            255
+          ],
+          "pixels": 398
+        }
+      ]
+    },
+    {
+      "file": "assets/reference-only/linkrunner-lr-monogram-blue-large-630-reference.png",
+      "kind": "reference-only",
+      "format": "png",
+      "status": "not-approved-for-default-use",
+      "officialUrl": null,
+      "originalAttachment": "composer_2026-08-23_12-55-55-268_b85a7f.png",
+      "note": "Custom LR monogram using an approximate #4E4BF6 field. Not a current canonical lockup.",
+      "sha256": "b857a09afd2805447e0605c483ba138bacf6fd8b4d8e8d8f49ee39545d6a43ac",
+      "width": 630,
+      "height": 630,
+      "mode": "RGBA",
+      "alphaMin": 255,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#4E4BF6",
+          "rgba": [
+            78,
+            75,
+            246,
+            255
+          ],
+          "pixels": 320480
+        },
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 74440
+        },
+        {
+          "hex": "#E9E9FE",
+          "rgba": [
+            233,
+            233,
+            254,
+            255
+          ],
+          "pixels": 431
+        },
+        {
+          "hex": "#7A78F8",
+          "rgba": [
+            122,
+            120,
+            248,
+            255
+          ],
+          "pixels": 343
+        }
+      ]
+    },
+    {
+      "file": "assets/reference-only/linkrunner-mark-blue-field-square-reference.png",
+      "kind": "reference-only",
+      "format": "png",
+      "status": "not-approved-for-default-use",
+      "officialUrl": null,
+      "originalAttachment": "composer_2026-08-23_12-55-55-311_349e5b.png",
+      "note": "Custom square mark on a current-blue field. Not a current canonical press-kit composition.",
+      "sha256": "1d42cc0eb3124ecd9bdf081c09f6e3326efc7265a79a65832961003addb10d73",
+      "width": 2272,
+      "height": 2272,
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#4D4BF7",
+          "rgba": [
+            77,
+            75,
+            247,
+            255
+          ],
+          "pixels": 3929992
+        },
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 915372
+        },
+        {
+          "hex": "#8B8AFA",
+          "rgba": [
+            139,
+            138,
+            250,
+            255
+          ],
+          "pixels": 305124
+        },
+        {
+          "hex": "#7A78F9",
+          "rgba": [
+            122,
+            120,
+            249,
+            255
+          ],
+          "pixels": 3315
+        }
+      ]
+    },
+    {
+      "file": "assets/reference-only/linkrunner-lr-monogram-blue-small-630-reference.png",
+      "kind": "reference-only",
+      "format": "png",
+      "status": "not-approved-for-default-use",
+      "officialUrl": null,
+      "originalAttachment": "composer_2026-08-23_12-55-55-360_0d4c21.png",
+      "note": "Custom small LR monogram using an approximate #4E4BF6 field. Not a current canonical lockup.",
+      "sha256": "2764aa616b88b06ef8d351e59ebc5646dc7e1b59b8dea8f88c5caf6d358709c1",
+      "width": 630,
+      "height": 630,
+      "mode": "RGBA",
+      "alphaMin": 255,
+      "alphaMax": 255,
+      "dominantOpaqueColors": [
+        {
+          "hex": "#4E4BF6",
+          "rgba": [
+            78,
+            75,
+            246,
+            255
+          ],
+          "pixels": 375534
+        },
+        {
+          "hex": "#FFFFFF",
+          "rgba": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "pixels": 20340
+        },
+        {
+          "hex": "#E9E9FE",
+          "rgba": [
+            233,
+            233,
+            254,
+            255
+          ],
+          "pixels": 194
+        },
+        {
+          "hex": "#908FF9",
+          "rgba": [
+            144,
+            143,
+            249,
+            255
+          ],
+          "pixels": 151
+        }
+      ]
+    }
+  ]
+}
