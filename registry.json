@@ -110,6 +110,17 @@
       "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
     },
     {
+      "id": "linkrunner-sdk-code-audit",
+      "category": "troubleshoot",
+      "slug": "code-audit",
+      "aliases": ["code-audit", "sdk-code-audit", "integration-audit", "audit", "integration-review"],
+      "path": "skills/linkrunner-sdk-code-audit",
+      "title": "Linkrunner - SDK code audit",
+      "description": "Audit an existing Linkrunner SDK integration from source code on any stack: finds every SDK call site, checks placement against the Function Placement Guide, traces the deferred and direct deep-link chains, checks platform config, and reports each defect with file:line evidence and a fix.",
+      "docs": "https://docs.linkrunner.io/testing/integration-testing",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
       "id": "linkrunner-events",
       "category": "events",
       "slug": "events",
