@@ -1,6 +1,6 @@
 {
   "name": "@linkrunner/skills",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Installable Agent Skills for Linkrunner SDK integration, troubleshooting, instrumentation, and brand-consistent design.",
   "type": "module",
   "bin": {
@@ -19,7 +19,7 @@
   },
   "scripts": {
     "list": "node bin/cli.mjs list",
-    "test": "node bin/cli.mjs add flutter --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add flutter --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent cursor --dir ./.smoke --dry-run"
+    "test": "node bin/cli.mjs add flutter --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add flutter --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add code-audit --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add code-audit --agent cursor --dir ./.smoke --dry-run"
   },
   "keywords": [
     "linkrunner",
@@ -30,7 +30,8 @@
     "cursor",
     "sdk",
     "branding",
-    "design-system"
+    "design-system",
+    "code-audit"
   ],
   "repository": {
     "type": "git",
