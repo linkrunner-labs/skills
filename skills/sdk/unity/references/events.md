@@ -93,6 +93,22 @@ C# objects - the C# wrapper does not serialize event payloads for you beyond
 
 Subscribe: `LinkrunnerSDK.OnEventTracked += (success, message) => { ... };`
 
+### Event parameters: one event, not one per variant
+
+Send one event with parameters, not one event per variant: send `purchase`
+with `{ plan: "gold" }`, not `purchase_gold` and `purchase_silver`. One event
+name keeps funnels, campaign columns and postback mappings simple, and the
+dashboard can filter and break down by `plan`.
+
+```csharp
+LinkrunnerSDK.TrackEvent("purchase", "{\"plan\": \"gold\"}"); // not purchase_gold / purchase_silver
+```
+
+Keep keys top-level and values flat and short, use the same key names and
+value types every time for an event, and never put PII in them. The same
+applies to the `eventDataJson` you pass to `CapturePayment`. See
+[Event parameters](https://docs.linkrunner.io/features/event-parameters).
+
 ## Attribution + resolved deeplink
 
 ```csharp

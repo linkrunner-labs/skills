@@ -90,7 +90,8 @@ func setAdditionalData() async {
 
 ## Revenue
 
-Revenue is only stored for attributed users - `signup` must run first.
+Revenue is stored for every user, attributed or organic (organic payments
+have no campaign). Call `signup` first so payments are linked to a user.
 
 ```swift
 try await LinkrunnerSDK.shared.capturePayment(
@@ -121,7 +122,8 @@ Payment statuses (`PaymentStatus`): `.initiated`, `.completed`, `.failed`,
 
 ## Custom / ecommerce events
 
-Events are only stored for attributed users - `signup` must run first.
+Events are stored for every user, attributed or organic (organic events
+have no campaign). Call `signup` first so events are linked to a user.
 
 ```swift
 try await LinkrunnerSDK.shared.trackEvent(
@@ -144,6 +146,25 @@ For Meta Catalog Sales ecommerce events (`AddToCart`, `ViewContent`, and
 see the [Meta Commerce Manager docs](https://docs.linkrunner.io/ecommerce-manager/meta-commerce-manager#understanding-event_data)
 for the full shape, and map the custom event name to the standard commerce
 event in the Linkrunner dashboard. Requires `linkrunner-ios` **3.8.0+**.
+
+### Event parameters: one event, not one per variant
+
+Send one event with parameters, not one event per variant: send `purchase`
+with `{ plan: "gold" }`, not `purchase_gold` and `purchase_silver`. One event
+name keeps funnels, campaign columns and postback mappings simple, and the
+dashboard can filter and break down by `plan`.
+
+```swift
+await LinkrunnerSDK.shared.trackEvent(
+    eventName: "purchase",
+    eventData: ["plan": "gold"] // not purchase_gold / purchase_silver
+)
+```
+
+Keep keys top-level and values flat and short, use the same key names and
+value types every time for an event, and never put PII in them. The same
+applies to the `eventData` you pass to `capturePayment`. See
+[Event parameters](https://docs.linkrunner.io/features/event-parameters).
 
 ## Attribution + resolved deeplink
 

@@ -78,6 +78,25 @@ await LinkRunner().trackEvent(
 
 Purchases go through `capturePayment` with the ecommerce payload (see docs).
 
+### Event parameters: one event, not one per variant
+
+Send one event with parameters, not one event per variant: send `purchase`
+with `{ plan: "gold" }`, not `purchase_gold` and `purchase_silver`. One event
+name keeps funnels, campaign columns and postback mappings simple, and the
+dashboard can filter and break down by `plan`.
+
+```dart
+await LinkRunner().trackEvent(
+  eventName: 'purchase',
+  eventData: {'plan': 'gold'}, // not purchase_gold / purchase_silver
+);
+```
+
+Keep keys top-level and values flat and short, use the same key names and
+value types every time for an event, and never put PII in them. The same
+applies to the `eventData` in `LRCapturePayment`. See
+[Event parameters](https://docs.linkrunner.io/features/event-parameters).
+
 ## Attribution + resolved deeplink
 
 ```dart

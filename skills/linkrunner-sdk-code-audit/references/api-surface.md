@@ -45,7 +45,7 @@ inspect network traffic or debug logs.
 | `signup` | `/api/client/trigger` | The identification flow (signup **or** login) | Once, when the user becomes known | Only on signup and not on login → returning users never tie to the install |
 | `setCustomerUserId` | *(SDK-managed)* | Right after `init`, as soon as the id is known | When the id becomes known/changes | Called with an unstable id (session id, device id regenerated per launch) |
 | `setUserData` | `/api/client/set-user-data` | Auth logic, after `signup` | When user details actually **change** | Fires on every launch / profile view with an unchanged payload |
-| `trackEvent` | `/api/client/capture-event` | Throughout the app | On a real user action | Fires on plain screen render/scroll; or the name is built dynamically |
+| `trackEvent` | `/api/client/capture-event` | Throughout the app | On a real user action | Fires on plain screen render/scroll; or the name is built dynamically or per variant (`purchase_gold`) instead of one name with event parameters |
 | `capturePayment` | `/api/client/capture-payment` | Payment processing | On payment **success** only | In the screen body, on checkout open, or on every retry |
 | `removePayment` | `/api/client/remove-captured-payment` | Refund flow | On refund/cancellation | - (rarely present; absence is fine) |
 | `setAdditionalData` | `/api/client/integrations` | Integration setup code | **Once**, when a third-party id (e.g. CleverTap) first becomes available | On a screen view or every launch - it has no client-side dedup |

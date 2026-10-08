@@ -88,8 +88,9 @@ marketing platforms.
 
 ## Revenue
 
-Revenue and events are only stored and displayed for **attributed** users -
-`signup` must run first. To attribute a test user, follow
+Revenue and events are stored for every user, attributed or organic (organic
+ones have no campaign). Call `signup` first so they are linked to a user. To
+test with an attributed user, follow
 [Integration Testing](https://docs.linkrunner.io/testing/integration-testing).
 Verify captured events on the
 [Events Settings](https://dashboard.linkrunner.io/dashboard/settings/events) page.
@@ -152,7 +153,8 @@ linkrunner.trackEvent(
 `trackEvent(eventName, eventData?, eventId?)` - `eventId` is a string or
 number, useful for deduplication and correlating with your backend.
 
-Events are only stored for attributed users - `signup` must run first. Prefer
+Events are stored for every user, attributed or organic (organic events
+have no campaign). Call `signup` first so events are linked to a user. Prefer
 `capturePayment` over `trackEvent` for revenue.
 
 **Revenue sharing with ad networks:** include a numeric `amount` in the event
@@ -172,6 +174,22 @@ the same `content_ids`/`contents`/`value` shape as `capturePayment`'s
 event in the Linkrunner Dashboard. See
 [Meta Commerce Manager](https://docs.linkrunner.io/ecommerce-manager/meta-commerce-manager#understanding-event_data)
 for field details.
+
+### Event parameters: one event, not one per variant
+
+Send one event with parameters, not one event per variant: send `purchase`
+with `{ plan: "gold" }`, not `purchase_gold` and `purchase_silver`. One event
+name keeps funnels, campaign columns and postback mappings simple, and the
+dashboard can filter and break down by `plan`.
+
+```javascript
+linkrunner.trackEvent("purchase", { plan: "gold" }); // not purchase_gold / purchase_silver
+```
+
+Keep keys top-level and values flat and short, use the same key names and
+value types every time for an event, and never put PII in them. The same
+applies to the `eventData` you pass to `capturePayment`. See
+[Event parameters](https://docs.linkrunner.io/features/event-parameters).
 
 ## Privacy: PII hashing
 
