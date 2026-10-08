@@ -17,8 +17,10 @@ POST /capture-payment  /  POST /remove-payment                          // serve
 
 ## Fields
 
-- `user_id` - **required**. Must match a user already registered via
-  `signup()`; revenue is only stored and displayed for attributed users.
+- `user_id` - **required** (server-side, `install_instance_id` can be sent
+  instead). Use the same id your app registered via `signup()`. Revenue is
+  stored for every user, attributed or organic; payments from users with no
+  matching click are stored without campaign attribution.
 - `amount` - **required**, one currency only. If you accept payments in
   multiple currencies, convert to a single currency before calling.
 - `payment_id` - optional but recommended, unique per transaction. See dedup below.
@@ -29,8 +31,9 @@ POST /capture-payment  /  POST /remove-payment                          // serve
 - `status` - optional, defaults to `PAYMENT_COMPLETED`. One of:
   `PAYMENT_INITIATED`, `PAYMENT_COMPLETED`, `PAYMENT_FAILED`,
   `PAYMENT_CANCELLED`.
-- `event_data` - optional. Use for the Meta ecommerce `Purchase` fields (see
-  `references/ecommerce-events.md`) or any other custom attributes.
+- `event_data` - optional. Use for the Meta ecommerce `Purchase` fields or
+  your own event parameters, such as `{ plan: "gold" }` (see
+  `references/ecommerce-events.md`).
 
 ## Deduplication
 

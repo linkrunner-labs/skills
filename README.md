@@ -55,7 +55,7 @@ Cross-cutting skills that are not tied to one platform:
 | --- | --- | --- |
 | Deep link troubleshooter | `npx @linkrunner/skills add deep-links` | Diagnoses why Universal Links / App Links open the browser instead of the app and reports the exact fix |
 | SDK code audit | `npx @linkrunner/skills add code-audit` | Reviews an existing Linkrunner integration from source on any stack and reports each defect with file:line evidence and a fix |
-| Event & revenue instrumentation | `npx @linkrunner/skills add events` | Correct event taxonomy + revenue (dedupe / refunds) + server-side event/revenue APIs |
+| Event & revenue instrumentation | `npx @linkrunner/skills add events` | Correct event taxonomy and event parameters + revenue (dedupe / refunds) + server-side event/revenue APIs |
 | Webhooks receiver | `npx @linkrunner/skills add webhooks` | Writes a webhook endpoint in your backend that verifies the `linkrunner-key` header and handles install/signup payloads |
 | Linkrunner brand system | `npx @linkrunner/skills add branding` | Applies one Linkrunner identity across public marketing, customer product, internal tools, documents, reports, decks, social, and partner surfaces |
 
