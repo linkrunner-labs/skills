@@ -1,0 +1,17 @@
+{
+  "name": "linkrunner",
+  "description": "Linkrunner for Claude Code: the Linkrunner connector (remote MCP server) and agent skills for SDK integration, deep links, events, webhooks, and brand.",
+  "owner": {
+    "name": "Linkrunner",
+    "url": "https://linkrunner.io"
+  },
+  "plugins": [
+    {
+      "name": "linkrunner",
+      "source": "./",
+      "description": "Linkrunner connector (mcp.linkrunner.io) plus skills to set up and integrate the Linkrunner SDK.",
+      "category": "development",
+      "tags": ["linkrunner", "attribution", "deep-linking", "sdk", "mcp"]
+    }
+  ]
+}
