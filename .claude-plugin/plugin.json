@@ -1,0 +1,29 @@
+{
+  "name": "linkrunner",
+  "displayName": "Linkrunner",
+  "version": "0.7.0",
+  "description": "Linkrunner connector (remote MCP server) and skills to set up the Linkrunner attribution SDK, deep links, events, webhooks, and brand.",
+  "author": {
+    "name": "Linkrunner",
+    "url": "https://linkrunner.io"
+  },
+  "homepage": "https://docs.linkrunner.io",
+  "repository": "https://github.com/linkrunner-labs/skills",
+  "license": "MIT",
+  "keywords": ["linkrunner", "attribution", "deep-linking", "sdk", "mcp"],
+  "skills": [
+    "./skills/onboarding/",
+    "./skills/sdk/",
+    "./skills/troubleshoot/",
+    "./skills/events/",
+    "./skills/integrations/",
+    "./skills/ad-networks/",
+    "./skills/branding/"
+  ],
+  "mcpServers": {
+    "linkrunner": {
+      "type": "http",
+      "url": "https://mcp.linkrunner.io/mcp"
+    }
+  }
+}

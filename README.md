@@ -10,6 +10,7 @@ workflows, and design brand-consistent Linkrunner surfaces. Skills include
 self-verifying checks, current references, and canonical brand assets.
 
 Published on npm as **[`@linkrunner/skills`](https://www.npmjs.com/package/@linkrunner/skills)**.
+Claude Code users can also install it as a plugin, see [Use with Claude Code](#use-with-claude-code).
 
 Works with Claude Code, Cursor, Windsurf, GitHub Copilot, or any agent that reads
 `AGENTS.md`.
@@ -34,6 +35,34 @@ npx @linkrunner/skills add react-native --dir ./apps/mobile
 npx @linkrunner/skills add flutter --dry-run   # preview, write nothing
 ```
 
+## Use with Claude Code
+
+Install the Linkrunner plugin. It adds the Linkrunner connector (the remote MCP
+server at `https://mcp.linkrunner.io/mcp`) and all of the skills in this repo:
+
+```bash
+claude plugin marketplace add linkrunner-labs/skills
+claude plugin install linkrunner@linkrunner
+```
+
+Then run `/mcp` in Claude Code to sign in to Linkrunner (or just ask for
+something that needs your account). Sign-in is OAuth, so there is no token to
+copy. New users can sign up in the same popup. Skills show up as
+`/linkrunner:<skill>`, for example `/linkrunner:setup-with-mcp`.
+
+If you only want the connector and not the skills:
+
+```bash
+claude mcp add --transport http linkrunner https://mcp.linkrunner.io/mcp
+```
+
+To set up a new app from zero, ask your agent: *"set up Linkrunner for this
+app"*. The `setup-with-mcp` skill checks your account, finds your app in the
+store, creates the project, and installs the SDK with the returned token. Two
+rules apply: creating a project needs a company email (Gmail accounts can be
+invited to projects but cannot create one), and an app needs a live App Store
+or Play Store listing. Help: support@linkrunner.io.
+
 ## Supported platforms
 
 | Platform | Skill id | Package |
@@ -57,6 +86,7 @@ Cross-cutting skills that are not tied to one platform:
 | SDK code audit | `npx @linkrunner/skills add code-audit` | Reviews an existing Linkrunner integration from source on any stack and reports each defect with file:line evidence and a fix |
 | Event & revenue instrumentation | `npx @linkrunner/skills add events` | Correct event taxonomy + revenue (dedupe / refunds) + server-side event/revenue APIs |
 | Webhooks receiver | `npx @linkrunner/skills add webhooks` | Writes a webhook endpoint in your backend that verifies the `linkrunner-key` header and handles install/signup payloads |
+| Set up with the connector | `npx @linkrunner/skills add setup-with-mcp` | Onboards a new app through the Linkrunner connector: creates the project, then installs the SDK with the returned token |
 | Linkrunner brand system | `npx @linkrunner/skills add branding` | Applies one Linkrunner identity across public marketing, customer product, internal tools, documents, reports, decks, social, and partner surfaces |
 
 Run `npx @linkrunner/skills list` to see everything grouped by category.

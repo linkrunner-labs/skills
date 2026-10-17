@@ -49,3 +49,17 @@ does not need it.
    description, package, docs, agentCompat).
 2. `node bin/cli.mjs add <platform> --dry-run` and confirm the file plan.
 3. `bash -n skills/sdk/<platform>/scripts/verify-deeplinks.sh` for scripts.
+
+## Claude Code plugin
+
+The repo root is also a Claude Code plugin marketplace (`.claude-plugin/marketplace.json`)
+holding one plugin, `linkrunner` (`.claude-plugin/plugin.json`). The plugin root is the
+repo root and its `skills` field points at the category folders (`skills/sdk/`,
+`skills/events/`, and so on), so a new skill inside an existing category folder is picked
+up with no plugin change. A new category folder needs a line in `plugin.json` `skills`.
+The plugin also bundles the remote MCP server `linkrunner` (`https://mcp.linkrunner.io/mcp`).
+
+- Keep `version` in `.claude-plugin/plugin.json` equal to `package.json` `version`. Claude
+  Code only offers an update when it changes.
+- Run `claude plugin validate . --strict` before pushing.
+- `.claude-plugin/` is not in the npm `files` list, so it is not published to npm.

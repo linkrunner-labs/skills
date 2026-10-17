@@ -154,6 +154,17 @@
       "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
     },
     {
+      "id": "linkrunner-setup-with-mcp",
+      "category": "onboarding",
+      "slug": "setup-with-mcp",
+      "aliases": ["setup-with-mcp", "setup", "onboarding", "onboard", "connector", "mcp"],
+      "path": "skills/onboarding/setup-with-mcp",
+      "title": "Linkrunner - set up with the connector",
+      "description": "Set up Linkrunner from zero through the Linkrunner connector (remote MCP server at mcp.linkrunner.io/mcp): check the signed-in account, find the app in its store and confirm it, create the project, install the SDK with the returned token using the platform skill, then verify. States the two rules (company email, live store listing) and what to do when refused.",
+      "docs": "https://docs.linkrunner.io",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
       "id": "linkrunner-branding",
       "category": "branding",
       "slug": "branding",
