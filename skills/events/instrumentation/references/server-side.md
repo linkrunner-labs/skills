@@ -4,10 +4,10 @@ Source of truth: https://docs.linkrunner.io/api-reference/event-capture and
 https://docs.linkrunner.io/api-reference/revenue-tracking
 
 Use these HTTP APIs for server-to-server tracking (webhooks, cron jobs,
-backend order processing) - and as the **only** way to track custom events or
-revenue from a web app, since the Linkrunner web SDK doesn't expose a client
-`trackEvent`/`capturePayment` call (it only auto-tracks page views and
-exposes `getStoreLink`).
+backend order processing). A website can track custom events in the browser
+with the web SDK's `lr.track(eventName, data)` (https://docs.linkrunner.io/sdk/web),
+but payments and other events you need to trust should come from your backend
+through these APIs.
 
 ## Base URL & auth
 
@@ -23,8 +23,10 @@ Every request needs this header:
 linkrunner-key: YOUR-SERVER-KEY
 ```
 
-Users must already be attributed via `.signup` in one of the client SDKs for
-their events/payments to be stored and displayed.
+Events and payments are stored for every user, attributed or organic.
+Ones from users with no matching click are stored without campaign
+attribution. Each request must identify the user with `user_id` (the same id
+your app passed to `signup`) or `install_instance_id`.
 
 ## Capture Event
 
@@ -35,8 +37,10 @@ POST /capture-event
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `event_name` | string | **Required.** Name of the event |
-| `event_data` | object | Optional. Additional data - include a numeric `amount` to enable ad-network revenue sharing |
-| `user_id` | string | **Required.** User identifier to associate the event with |
+| `event_data` | object | Optional. Event parameters - include a numeric `amount` to enable ad-network revenue sharing |
+| `user_id` | string | **Required** unless `install_instance_id` is sent. User identifier to associate the event with |
+| `install_instance_id` | string | **Required** unless `user_id` is sent. Linkrunner's ID for the install |
+| `event_id` | string | Optional. Your own unique id for the event, for deduplication and correlating with your backend |
 
 ```bash
 curl -X POST https://api.linkrunner.io/api/v1/capture-event \
@@ -49,8 +53,12 @@ curl -X POST https://api.linkrunner.io/api/v1/capture-event \
   }'
 ```
 
-Responses: `201` captured, `400` missing required parameters, `401` invalid
-server key.
+Responses: `200` captured, `400` missing required parameters (or neither
+`user_id` nor `install_instance_id`), `401` invalid server key.
+
+Send variants as event parameters on one event name (`purchase` with
+`{ "plan": "gold" }`, not `purchase_gold`). See the event parameters section
+in `references/ecommerce-events.md`.
 
 For the ecommerce (`AddToCart`/`ViewContent`) field requirements, see
 `references/ecommerce-events.md`.
@@ -68,7 +76,7 @@ POST /capture-payment
 | `amount` | number | **Required**, single currency only |
 | `type` | string | Optional, defaults to `DEFAULT` |
 | `status` | string | Optional, defaults to `PAYMENT_COMPLETED` |
-| `event_data` | object | Optional - Meta ecommerce `Purchase` fields |
+| `event_data` | object | Optional - Meta ecommerce `Purchase` fields or your own event parameters |
 
 ```bash
 curl -X POST https://api.linkrunner.io/api/v1/capture-payment \

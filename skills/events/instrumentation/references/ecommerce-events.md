@@ -36,6 +36,38 @@ revenue-sharing with Meta/Google so they can optimize on conversion value -
 `amount` must be a number, not a string. For actual payments, prefer
 `capturePayment` (`references/revenue.md`) over `trackEvent`.
 
+## Event parameters
+
+Event parameters are the key-value pairs you already send as `eventData`
+(SDKs) / `event_data` (wire) with `trackEvent` and `capturePayment`. The
+dashboard can filter and break down events by them (events log, funnels,
+users, campaign tables). Nothing new is collected; it uses what you send.
+
+**Send one event with parameters, not one event per variant.** Send
+`purchase` with `{ plan: "gold" }`, not `purchase_gold` and
+`purchase_silver`. One event name keeps funnels, campaign columns and
+postback mappings simple, and the dashboard can filter and break down by
+`plan`.
+
+```
+trackEvent("purchase", { plan: "gold" })       // do this
+trackEvent("purchase_gold")                    // not this
+```
+
+- **Keep keys top-level and values flat.** Filters and breakdowns work on
+  top-level keys only. Values can be strings, numbers, booleans, or nested
+  objects/lists, but nested values are only usable as text.
+- **Keep values short.** Values over 256 characters are not used for filtering.
+- **Same keys, same types, every time.** Don't send `plan: "gold"` sometimes
+  and `plan_name: "Gold"` other times, or a number in one call and a string in
+  the next.
+- **No PII.** No emails, phone numbers or names; `signup`/`setUserData` have
+  fields for those.
+- Meta commerce fields (`content_ids`, `contents`, below) keep the shape Meta
+  needs. These rules are for your own keys.
+
+Docs: https://docs.linkrunner.io/features/event-parameters
+
 ## Meta Catalog Sales taxonomy
 
 If the goal is feeding Meta Catalog Sales / Commerce Manager (retargeting on

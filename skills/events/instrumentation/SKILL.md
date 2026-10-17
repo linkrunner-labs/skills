@@ -3,13 +3,13 @@ name: linkrunner-events
 description: >-
   Instrument Linkrunner event and revenue tracking correctly - what events to
   send, when to send them, and how to avoid double-counted, dropped, or
-  missing revenue. Platform-agnostic: covers the event taxonomy, ad-network
-  ecommerce fields, capturePayment/removePayment correctness, and the
-  server-side Capture Event / Revenue Tracking HTTP APIs. Use when asked to
-  instrument Linkrunner events, track purchases or revenue with Linkrunner,
-  decide what events to send, debug why revenue or events are missing or
-  double-counted, or send events from a backend/web app that has no client
-  SDK call for custom events.
+  missing revenue. Platform-agnostic: covers the event taxonomy, event
+  parameters, ad-network ecommerce fields, capturePayment/removePayment
+  correctness, and the server-side Capture Event / Revenue Tracking HTTP APIs.
+  Use when asked to instrument Linkrunner events, track purchases or revenue
+  with Linkrunner, decide what events or event parameters to send, debug why
+  revenue or events are missing or double-counted, or send events and
+  payments from a backend.
 metadata:
   category: events
   slug: events
@@ -26,14 +26,14 @@ SDK skill (`skills/sdk/<platform>/references/events.md`) owns the exact
 
 ## 0. Before you touch anything
 
-1. Confirm **`signup()` has already been wired** for this app. Events and
-   revenue are only stored and displayed for attributed users - a user must
-   have been registered via `.signup` in an SDK before their events show up.
-   If it isn't wired yet, stop and set that up first via the relevant
-   `skills/sdk/<platform>/` skill.
+1. Confirm **`signup()` has already been wired** for this app so events and
+   payments are linked to a user. Events and revenue are stored for every
+   user, attributed or organic; ones from users with no matching click are
+   stored without campaign attribution. If `signup` isn't wired yet, set it up
+   first via the relevant `skills/sdk/<platform>/` skill.
 2. Identify which SDK is installed (Flutter, React Native, Expo, iOS,
    Android, Capacitor, Cordova, Unity, Web) - or whether this is a
-   backend/web flow with **no client SDK in the loop**. That decides whether
+   backend flow with **no client SDK in the loop**. That decides whether
    you write client code or call the HTTP API.
 3. Ask what's actually being tracked: generic product/behavior events,
    ecommerce events meant to feed Meta Catalog Sales, revenue/payments, or
@@ -46,15 +46,23 @@ SDK skill (`skills/sdk/<platform>/references/events.md`) owns the exact
 
 | They want... | Do this |
 | --- | --- |
-| "What events should I send" / "instrument Linkrunner events" | `references/ecommerce-events.md` for the taxonomy, then the platform skill's `events.md` for exact call syntax |
+| "What events should I send" / "instrument Linkrunner events" / "which event parameters" | `references/ecommerce-events.md` for the taxonomy and event parameters, then the platform skill's `events.md` for exact call syntax |
 | "Track purchases / revenue" / "revenue is wrong, missing, or double-counted" | `references/revenue.md` |
-| "Track events from my backend / web app / server" | `references/server-side.md` (also the only path for the web SDK, which has no client `trackEvent`) |
+| "Track events from my backend / server" | `references/server-side.md` |
+| "Track events from my website" (web SDK) | `lr.track(eventName, data)`, see https://docs.linkrunner.io/sdk/web. Send payments you need to trust from your backend (`references/server-side.md`) |
 | "AddToCart / ViewContent / Purchase not showing in Meta" | `references/ecommerce-events.md`, then confirm the custom event is **mapped** to the standard commerce event in the dashboard (Meta Ads → Event Mapping) |
 
 ## 2. Golden rules
 
-- Nothing shows up for an unattributed user. `signup()` (or `.signup`) must
-  run before any event or payment call means anything.
+- Events and payments are stored for every user, attributed or organic
+  (organic ones carry no campaign). Run `signup()` (or `.signup`) first so
+  they are linked to a user.
+- **Send one event with parameters, not one event per variant.** Send
+  `purchase` with `{ plan: "gold" }`, not `purchase_gold` and
+  `purchase_silver`. One event name keeps funnels, campaign columns and
+  postback mappings simple, and the dashboard can filter and break down by
+  `plan`. Keep parameters flat, use the same keys and value types every time,
+  and never put PII in them. See `references/ecommerce-events.md`.
 - Client-side custom events and payments always go through the per-platform
   SDK - defer syntax to `skills/sdk/<platform>/references/events.md`. Don't
   invent a generic snippet here.
@@ -73,15 +81,16 @@ SDK skill (`skills/sdk/<platform>/references/events.md`) owns the exact
 - Payment dedup key is the `(type, payment_id)` combination - always send a
   unique `payment_id` per transaction so re-sends dedupe instead of silently
   colliding. See `references/revenue.md` for the full failure mode.
-- The web SDK has no client `trackEvent`/`capturePayment` call today - custom
-  event and revenue tracking from a web app goes through the server-side APIs
-  in `references/server-side.md`.
+- The web SDK tracks custom events with `lr.track(eventName, data)` (see
+  https://docs.linkrunner.io/sdk/web). It has no `capturePayment`; send
+  payments and other events you need to trust from your backend with the
+  server-side APIs in `references/server-side.md`.
 
 ## 3. Verify
 
 - Check the dashboard [Events Settings](https://dashboard.linkrunner.io/dashboard/settings/events)
   page to confirm events are being captured.
-- To attribute a test user before events will show up, follow the
+- To test with an attributed user, so events carry a campaign, follow the
   [Integration Testing](https://docs.linkrunner.io/testing/integration-testing)
   guide.
 - For Meta ecommerce events, check Meta Events Manager / Commerce Manager -
@@ -90,6 +99,6 @@ SDK skill (`skills/sdk/<platform>/references/events.md`) owns the exact
 
 ## References
 
-- `references/ecommerce-events.md` - event taxonomy, Meta Catalog Sales fields, when to fire each event
+- `references/ecommerce-events.md` - event taxonomy, event parameters, Meta Catalog Sales fields, when to fire each event
 - `references/revenue.md` - capturePayment/removePayment correctness, dedup, refunds, double-counting
-- `references/server-side.md` - Capture Event / Revenue Tracking HTTP APIs for server-to-server and web tracking
+- `references/server-side.md` - Capture Event / Revenue Tracking HTTP APIs for server-to-server tracking, including payments from a website

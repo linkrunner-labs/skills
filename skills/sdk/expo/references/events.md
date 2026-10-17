@@ -83,7 +83,8 @@ await linkrunner.setAdditionalData({
 
 ## Revenue
 
-Revenue is only stored for attributed users - `signup` must run first.
+Revenue is stored for every user, attributed or organic (organic payments
+have no campaign). Call `signup` first so payments are linked to a user.
 
 ```javascript
 const capturePayment = async () => {
@@ -132,7 +133,8 @@ await linkrunner.trackEvent(
 `eventId` is your own unique identifier for the event - optional, useful for
 deduplication and correlating with your backend.
 
-Events are only stored for attributed users - `signup` must run first. To
+Events are stored for every user, attributed or organic (organic events
+have no campaign). Call `signup` first so events are linked to a user. To
 share revenue with ad networks (Meta, Google), include a numeric `amount` in
 the event data - not a string.
 
@@ -140,6 +142,22 @@ For Ecommerce Event Manager events (`AddToCart`, `ViewContent`, ...), format
 `eventData` with Meta's commerce fields and map the custom event name to the
 standard commerce event in the Linkrunner dashboard. Purchases go through
 `capturePayment` with the same ecommerce payload, not `trackEvent`.
+
+### Event parameters: one event, not one per variant
+
+Send one event with parameters, not one event per variant: send `purchase`
+with `{ plan: "gold" }`, not `purchase_gold` and `purchase_silver`. One event
+name keeps funnels, campaign columns and postback mappings simple, and the
+dashboard can filter and break down by `plan`.
+
+```javascript
+await linkrunner.trackEvent("purchase", { plan: "gold" }); // not purchase_gold / purchase_silver
+```
+
+Keep keys top-level and values flat and short, use the same key names and
+value types every time for an event, and never put PII in them. The same
+applies to the `eventData` you pass to `capturePayment`. See
+[Event parameters](https://docs.linkrunner.io/features/event-parameters).
 
 ## Enhanced privacy controls
 
