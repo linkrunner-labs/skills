@@ -90,6 +90,11 @@ Confirm these with the user, then call `create_project`:
 | store link(s) | from step 3 |
 | timezone | IANA name such as `Asia/Kolkata`; ask if unsure |
 | billing_currency | optional, `USD` or `INR`; ask only if the user cares |
+| billing_account_id | only if `get_my_account` lists `billing_accounts`: ask which company the project is billed to and pass that id. With an empty list, leave it out and a new billing account is created |
+
+If the tool answers that a billing account must be chosen, show the listed
+options to the user, ask, and call again with `billing_account_id`. Never pick one
+for them.
 
 It returns the project id and the SDK token. Do not quote free allowance or
 pricing numbers; point the user to the dashboard for billing. New projects get
