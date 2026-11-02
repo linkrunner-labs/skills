@@ -29,7 +29,7 @@ on CocoaPods, point them at the docs URL above instead of guessing a pod name.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/linkrunner-labs/linkrunner-ios.git", from: "3.12.0")
+    .package(url: "https://github.com/linkrunner-labs/linkrunner-ios.git", from: "4.3.2")
 ]
 ```
 
