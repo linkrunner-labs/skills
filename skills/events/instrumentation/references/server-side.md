@@ -61,16 +61,15 @@ curl -X POST https://api.linkrunner.io/api/v1/capture-event \
 ```
 
 **Payment fields:** send `amount`, `payment_id` and `currency` at the top
-level, all three or none. One or two of them fails with `400 amount,
-payment_id and currency must be sent together`. Without them the request is a
-custom event. Old payment types keep their uppercase spelling as
+level, all three together. With none of them, or only one or two, the
+request is a custom event and still returns `200`. Old payment types keep their uppercase spelling as
 `event_name` (`FIRST_PAYMENT`, `DEFAULT`, ...) so existing mappings keep
 matching. A retry with the same `payment_id`, `event_name` and `status` is
 not stored twice and still returns `200`. Refund: same `event_name` and
 `payment_id` with `status` `PAYMENT_CANCELLED`.
 
 Responses: `200` event or payment captured, `400` missing or invalid
-parameters (including incomplete payment fields), `401` invalid server key.
+parameters (including an invalid payment field when all three are sent), `401` invalid server key.
 
 For the ecommerce (`AddToCart`/`ViewContent`) field requirements, see
 `references/ecommerce-events.md`.

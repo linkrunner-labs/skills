@@ -70,9 +70,10 @@ What makes it a payment:
 - `amount`, `paymentId` and `currency` all present: a payment.
 - `amount` or `currency` without `paymentId`: a normal custom event, not
   revenue. An `amount` inside `event_data` on the server never makes a payment.
-- `paymentId` with `amount` or `currency` missing: rejected, nothing is sent
-  (server: `400 amount, payment_id and currency must be sent together`). How
-  the SDK reports it differs per platform; see the platform's `events.md`.
+- `paymentId` with `amount` or `currency` missing: the SDK rejects it and
+  nothing is sent. How it reports that differs per platform; see the
+  platform's `events.md`. On the server API the same request is stored as a
+  custom event (`200`).
 
 ## Deduplication
 
