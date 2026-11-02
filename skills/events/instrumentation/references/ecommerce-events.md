@@ -31,10 +31,10 @@ an enforced enum. Snake_case is the recommended convention.
 | `achievement_unlocked` | User unlocks an achievement |
 | `user_referred` | User refers someone |
 
-For any of these, including a numeric `amount` in `event_data` enables
-revenue-sharing with Meta/Google so they can optimize on conversion value -
-`amount` must be a number, not a string. For actual payments, prefer
-`capturePayment` (`references/revenue.md`) over `trackEvent`.
+An `amount` in the event data of any of these is ordinary event data, not
+revenue. For actual payments, send a payment: `trackEvent` with `amount`,
+`paymentId` and `currency` together (`references/revenue.md`). Deprecated
+`capturePayment` still works but should not be added to new code.
 
 ## Meta Catalog Sales taxonomy
 
@@ -42,14 +42,15 @@ If the goal is feeding Meta Catalog Sales / Commerce Manager (retargeting on
 `ViewContent`/`AddToCart`, dynamic product ads), there are exactly **3**
 essential events:
 
-- `Purchase` - via `capturePayment` / the Capture Payment API (`references/revenue.md`)
+- `Purchase` - a payment via `trackEvent` / the Capture Event API payment fields (`references/revenue.md`)
 - `AddToCart` - via `trackEvent` / the Capture Event API
 - `ViewContent` - via `trackEvent` / the Capture Event API
 
 **Before sending, map the custom event to its standard commerce event in the
 Linkrunner Dashboard** (Meta Ads → Event Mapping). For example, map
 `add_to_cart` → `AddToCart`, `item_viewed` or `view_content` → `ViewContent`,
-and the payment type you use (e.g. `DEFAULT` or `FIRST_PAYMENT`) → `Purchase`.
+and the payment event name you use (e.g. `purchase`, `DEFAULT` or
+`FIRST_PAYMENT`) → `Purchase`.
 Sending the event without this mapping does not sync it to Meta.
 
 ### Required `event_data` fields
@@ -60,8 +61,8 @@ Sending the event without this mapping does not sync it to Meta.
 | `item_group_ids` | array | alternative to `content_ids` | Use to boost an entire product group instead of one variant |
 | `contents` | array of objects | `Purchase`, `AddToCart`, `ViewContent` | Each entry: `id` (matches `content_ids`/`item_group_ids`), `quantity`, `item_price` (must match the Meta catalogue price) |
 | `content_type` | string | `Purchase`, `AddToCart`, `ViewContent` | `"product"` when using `content_ids`, `"product_group"` when using `item_group_ids` |
-| `value` | number | `Purchase`, `AddToCart` | Total numeric value, e.g. sum of `item_price * quantity` |
-| `currency` | string | required when `value` is sent | ISO 4217 code, e.g. `"USD"`, `"INR"` |
+| `value` | number | `AddToCart` | Total numeric value, e.g. sum of `item_price * quantity`. For `Purchase`, Meta takes the value from the payment `amount` (the order total) |
+| `currency` | string | required when `value` is sent | ISO 4217 code, e.g. `"USD"`, `"INR"`. For `Purchase`, the payment `currency` |
 | `num_items` | number | `Purchase`, `AddToCart` | Total quantity across `contents` |
 | `order_id` | string | `Purchase` | Backend-generated unique purchase order ID |
 

@@ -64,40 +64,74 @@ result.onSuccess { /* ... */ }.onFailure { error -> /* ... */ }
 
 ## Revenue
 
-Revenue is only stored for attributed users - `signup` must run first.
+A payment is a `trackEvent` call with `amount`, `paymentId` and `currency`
+together in `eventData`, plus `userId`. Needs `io.linkrunner:android-sdk`
+**5.0.0+** (older versions: see below). Revenue is stored for all users,
+including organic ones.
 
 ```kotlin
-val paymentData = CapturePaymentRequest(
-    paymentId = "payment_123", // Required: unique payment identifier
-    userId = "user123", // Required
-    amount = 99.99, // Required
-    type = PaymentType.FIRST_PAYMENT, // Optional, defaults to DEFAULT
-    status = PaymentStatus.PAYMENT_COMPLETED, // Optional, defaults to PAYMENT_COMPLETED
-    eventData = mapOf( // Optional - ecommerce/custom payload
-        "content_ids" to listOf("product_123"),
-        "currency" to "USD",
-        "value" to 99.99
-    )
-)
-LinkRunner.getInstance().capturePayment(paymentData)
-
-// refund / undo
-val removeRequest = RemovePaymentRequest(
-    paymentId = "payment_123", // Optional
-    userId = "user123" // Optional
-)
-LinkRunner.getInstance().removePayment(removeRequest)
+CoroutineScope(Dispatchers.IO).launch {
+    LinkRunner.getInstance().trackEvent(
+        eventName = "purchase", // payment type in reports and mappings
+        eventData = mapOf(
+            "amount" to 1499.0,          // required: order total, a number >= 0
+            "paymentId" to "order_123",  // required: your order id, dedup key
+            "currency" to "INR",         // required: 3-letter ISO 4217
+            "userId" to "user_123",      // required: "" = user saved by signup
+            "status" to "PAYMENT_COMPLETED", // optional, the default
+            // optional: other keys stay event data (Meta/Google product fields)
+            "content_ids" to listOf("sku_1"),
+            "num_items" to 1,
+            "order_id" to "order_123"
+        )
+    ).onFailure { error ->
+        println("Invalid payment: ${error.message}")
+    }
+}
 ```
 
-`removePayment` needs either `paymentId` or `userId`. With only `userId`, all
-of that user's payments are removed.
+- **The event name is the payment type.** It is stored exactly as sent and
+  matched exactly, letter case included, against Meta, Google, SKAN and
+  affiliate mappings. Old payment types keep their uppercase spelling:
+  `FIRST_PAYMENT`, `SECOND_PAYMENT`, `TRIAL_STARTED`, `TRIAL_CANCELLED`,
+  `WALLET_TOPUP`, `FUNDS_WITHDRAWAL`, `SUBSCRIPTION_CREATED`,
+  `SUBSCRIPTION_RENEWED`, `SUBSCRIPTION_CANCELLED`, `SUBSCRIPTION_REFUNDED`,
+  `SUBSCRIPTION_BILLING_ISSUE`, `DEFAULT`, `ONE_TIME`, `RECURRING`.
+  `first_payment` is a new type that no existing mapping matches, and any new
+  name (such as `purchase`) needs its own dashboard mapping before it reaches
+  ad networks.
+- Required: `amount` (a number, 0 or more, the order total), `paymentId` (your
+  stable order or transaction id, never a random value), `currency` (3-letter
+  ISO 4217, such as `INR`) and `userId` (`""` uses the user saved by `signup`
+  or `setUserData`).
+- `status` is optional: `PAYMENT_INITIATED`, `PAYMENT_COMPLETED` (default),
+  `PAYMENT_FAILED`, `PAYMENT_CANCELLED`. Only `PAYMENT_COMPLETED` counts as
+  revenue and is sent to ad networks.
+- `amount` or `currency` without `paymentId` is a normal custom event.
+  `paymentId` with `amount` or `currency` missing, a negative `amount`, a
+  blank `paymentId` or a non-3-letter `currency` is rejected and nothing is
+  sent: `trackEvent` returns a failed `Result` holding an
+  `IllegalArgumentException` (it does not throw), so handle `onFailure`. From
+  Java, `LinkrunnerJava.getInstance().trackEvent(...)` calls `onError` on the
+  `LinkRunnerCallback`.
+- Linkrunner keeps one payment per `paymentId` + event name + `status`, so
+  retries are safe. The same `paymentId` under two event names counts twice.
+- Refund or cancellation: same event name and `paymentId`, the original
+  `amount` and `currency`, and `status` `PAYMENT_CANCELLED`.
+- `io.linkrunner.sdk.models.PaymentStatus` has the same four values if you
+  prefer an enum (`PaymentStatus.X.name` gives the string).
 
-**Payment types:** `FIRST_PAYMENT`, `SECOND_PAYMENT`, `WALLET_TOPUP`,
-`FUNDS_WITHDRAWAL`, `SUBSCRIPTION_CREATED`, `SUBSCRIPTION_RENEWED`,
-`ONE_TIME`, `RECURRING`, `DEFAULT`.
+### Older SDK versions
 
-**Payment statuses:** `PAYMENT_INITIATED`, `PAYMENT_COMPLETED`,
-`PAYMENT_FAILED`, `PAYMENT_CANCELLED`.
+From 5.0.0, `capturePayment` and `removePayment` are deprecated: they still
+work, show an IDE deprecation warning, and will be removed in a future major
+version. On 4.x, payments use
+`LinkRunner.getInstance().capturePayment(CapturePaymentRequest(...))` with a
+`PaymentType`, and refunds use `removePayment(RemovePaymentRequest(...))`.
+
+To move existing calls to `trackEvent` (same payment name, `currency` added),
+run `npx @linkrunner/skills add migrate-payments` or follow
+https://docs.linkrunner.io/sdk/migrate-to-track-event.
 
 ## Custom / ecommerce events
 
@@ -111,7 +145,7 @@ LinkRunner.getInstance().trackEvent(
     eventName = "purchase_initiated",
     eventData = mapOf(
         "product_id" to "12345",
-        "amount" to 99.99 // pass amount as a number for ad-network revenue sharing (Google/Meta)
+        "amount" to 99.99 // event data only, revenue needs the payment keys (see Revenue)
     ),
     eventId = "order_12345" // Optional: your own unique event identifier, useful for deduplication and correlating with your backend
 )
@@ -126,8 +160,8 @@ For Meta Catalog Sales sync, `eventData` needs Meta's ecommerce fields
 `num_items`) - requires `android-sdk` **v3.6.0+**, and the custom event name
 must be mapped to the standard commerce event in the Linkrunner Dashboard.
 See [Meta Commerce Manager](https://docs.linkrunner.io/ecommerce-manager/meta-commerce-manager#understanding-event_data)
-for the full field reference. Purchases go through `capturePayment` (with
-`order_id` in `eventData`), not `trackEvent`.
+for the full field reference. Purchases are `trackEvent` payments (see
+Revenue) with `order_id` and the product fields in `eventData`.
 
 ## Attribution + resolved deeplink
 

@@ -17,9 +17,12 @@ Unity's own Gradle template files, not a `.jar` drop. Create/edit
 
 ```gradle
 dependencies {
-    implementation 'io.linkrunner:android-sdk:3.6.0'
+    implementation 'io.linkrunner:android-sdk:5.0.0'
 }
 ```
+
+Payments through `TrackEvent` need Android SDK 5.0.0+ and LinkrunnerKit 5.0.0+
+in the bridges.
 
 Ensure Maven Central is reachable in `Assets/Plugins/Android/settingsTemplate.gradle`:
 
@@ -63,13 +66,13 @@ the matching `LinkrunnerJava` method and reporting back via
 `UnityPlayer.UnitySendMessage("LinkrunnerCallbackHandler", "<OnXComplete>", <json>)`:
 
 `initialize`, `signup`, `setUserData`, `getAttributionData`, `trackEvent`,
-`capturePayment`, `removePayment`, `setPushToken`, `setAdditionalData`,
-`enablePIIHashing`, `setDisableAaidCollection`, `handleDeeplink`.
+`setPushToken`, `setAdditionalData`, `enablePIIHashing`,
+`setDisableAaidCollection`, `handleDeeplink`. Payments go through
+`trackEvent` (see `references/events.md`), so the bridge has no payment method.
 
-The full ~300-line class (JSON parsing helpers, `PaymentType`/`PaymentStatus`
-enum mapping, every method body) is in the doc's **Android Setup → Step 3**
-- copy it verbatim as a starting point, then adjust only if the SDK version
-differs.
+The full ~300-line class (JSON parsing helpers, every method body) is in the
+doc's **Android Setup → Step 3** - copy it verbatim as a starting point, then
+adjust only if the SDK version differs.
 
 ### ProGuard/R8
 
@@ -86,7 +89,7 @@ After Unity builds the Xcode project:
 
 1. Xcode → **File → Add Package Dependencies...**
 2. URL: `https://github.com/linkrunner-labs/linkrunner-ios.git`
-3. Version 3.8.0+, add package, select the **LinkrunnerKitStatic** library (not
+3. Version 5.0.0+, add package, select the **LinkrunnerKitStatic** library (not
    the dynamic variant - picking the wrong one causes linker errors)
 
 This step does not survive Unity regenerating the Xcode project, so it must
@@ -117,15 +120,13 @@ report back via a `@_silgen_name("UnitySendMessage")` declaration to
 `sendToUnity(method, message)`. Functions to expose, matching the C# `DllImport`
 names 1:1: `_LinkrunnerInitialize`, `_LinkrunnerSignup`,
 `_LinkrunnerSetUserData`, `_LinkrunnerGetAttributionData`,
-`_LinkrunnerTrackEvent`, `_LinkrunnerCapturePayment`,
-`_LinkrunnerRemovePayment`, `_LinkrunnerSetPushToken`,
+`_LinkrunnerTrackEvent`, `_LinkrunnerSetPushToken`,
 `_LinkrunnerSetAdditionalData`, `_LinkrunnerEnablePIIHashing`,
 `_LinkrunnerHandleDeeplink`.
 
-The full bridge file (JSON dict helpers, `parseUserData`,
-`parsePaymentType`/`parsePaymentStatus`, every `@_cdecl` function body) is in
-the doc's **iOS Setup → Step 3** - copy verbatim, adjust only for SDK API
-changes.
+The full bridge file (JSON dict helpers, `parseUserData`, every `@_cdecl`
+function body) is in the doc's **iOS Setup → Step 3** - copy verbatim, adjust
+only for SDK API changes.
 
 **Unity does not compile `.swift` files in `Assets/Plugins/iOS/` automatically.**
 After Unity generates the Xcode project, manually:
@@ -147,13 +148,12 @@ in the first scene (both native bridges call back into that name via
 - Wraps `AndroidJavaClass("com.linkrunner.unity.LinkrunnerBridge")` under
   `#if UNITY_ANDROID && !UNITY_EDITOR`
 - Exposes `static` methods (`Initialize`, `Signup`, `SetUserData`,
-  `GetAttributionData`, `TrackEvent`, `CapturePayment`, `RemovePayment`,
-  `SetPushToken`, `SetAdditionalData`, `EnablePIIHashing`, `HandleDeeplink`,
-  `SetDisableAaidCollection`) that dispatch to the right platform and no-op
+  `GetAttributionData`, `TrackEvent`, `SetPushToken`, `SetAdditionalData`,
+  `EnablePIIHashing`, `HandleDeeplink`, `SetDisableAaidCollection`) that dispatch to the right platform and no-op
   (log only) in the Editor
 - Exposes C# `event Action<...>` callbacks (`OnInitialized`, `OnSignedUp`,
-  `OnUserDataSet`, `OnAttributionData`, `OnEventTracked`, `OnPaymentCaptured`,
-  `OnPaymentRemoved`, `OnDeeplinkHandled`) fired from native callback methods
+  `OnUserDataSet`, `OnAttributionData`, `OnEventTracked`,
+  `OnDeeplinkHandled`) fired from native callback methods
   (`OnInitComplete`, `OnSignupComplete`, etc.) that Unity invokes on the
   `LinkrunnerCallbackHandler` GameObject
 - Defines `[Serializable] class LinkrunnerUserData` (`id` required; `name`,
