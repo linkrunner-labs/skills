@@ -2,7 +2,8 @@
 # scan-integration.sh - first-pass inventory of a Linkrunner SDK integration in a source repo.
 #
 # Prints: detected stack(s), the SDK dependency + version, every candidate SDK call site
-# with file:line, config-file findings, and a list of hygiene smells worth checking by hand.
+# with file:line, trackEvent payments and deprecated payment calls, config-file findings, and a
+# list of hygiene smells worth checking by hand.
 #
 # This is a MAP, not a verdict. Every line it prints must be opened and read before it
 # becomes a finding - see references/call-site-analysis.md.
@@ -103,6 +104,61 @@ grep -rhoE "trackEvent\s*\(\s*[\"'\`][^\"'\`]{1,60}[\"'\`]" "${EXC[@]}" "${INC[@
 DYN=$(grep -rnE "trackEvent\s*\(\s*[\`\$]|trackEvent\s*\(\s*[a-zA-Z_][a-zA-Z0-9_.]*\s*[,)]" "${EXC[@]}" "${INC[@]}" . 2>/dev/null | head -10)
 [ -n "$DYN" ] && { sub "DYNAMIC / variable event names (unqueryable in the dashboard - check these)"; echo "$DYN" | sed 's|^\./|   |'; }
 
+# ---------------------------------------------------------------- 3b. payments
+# On the new SDK majors a payment is trackEvent with amount + paymentId + currency in the event
+# data; capturePayment/removePayment still work there but are deprecated. Scan each trackEvent
+# call plus the 14 lines after it (the event-data literal) for the payment keys.
+PAY_WIN=$(grep -rnE -A14 "trackEvent\s*\(|TrackEvent\s*\(" "${EXC[@]}" "${INC[@]}" . 2>/dev/null)
+PAY_SCAN=$(printf '%s\n' "$PAY_WIN" | awk '
+  function flush() {
+    if (site != "" && pid) {
+      n++
+      print "PAY\t" site "\t" name
+      if (!cur || !amt) print "MISS\t" site "\t" name "\t" (amt ? "" : "amount ") (cur ? "" : "currency")
+      lname = tolower(name)
+      if (lname in old && name != toupper(name)) print "CASE\t" site "\t" name "\t" toupper(name)
+      if (name == "DEFAULT_PAYMENT") print "CASE\t" site "\t" name "\tDEFAULT"
+    }
+    site = ""; pid = 0; cur = 0; amt = 0; name = ""; open = 0
+  }
+  BEGIN {
+    split("first_payment second_payment trial_started trial_cancelled wallet_topup funds_withdrawal subscription_created subscription_renewed subscription_cancelled subscription_refunded subscription_billing_issue default one_time recurring default_payment", t, " ")
+    for (i in t) old[t[i]] = 1
+  }
+  /^--$/ { flush(); next }
+  {
+    line = $0
+    if (match(line, /^[^:]+:[0-9]+:/) && line ~ /[Tt]rackEvent[ \t]*\(/) {
+      flush()
+      site = substr(line, 1, RLENGTH - 1)
+      line = substr(line, RLENGTH + 1)
+      match(line, /[Tt]rackEvent[ \t]*\(/); line = substr(line, RSTART)
+      depth = 0; open = 1
+    } else {
+      sub(/^[^:]*-[0-9]+-/, "", line)
+    }
+    if (site == "" || !open) next
+    if (name == "" && match(line, /([Tt]rackEvent[ \t]*\(|eventName[ \t]*[:=])[ \t]*["\047`][^"\047`]+/)) {
+      name = substr(line, RSTART, RLENGTH); sub(/.*["\047`]/, "", name)
+    }
+    if (line ~ /paymentId/) pid = 1
+    if (line ~ /currency/) cur = 1
+    if (line ~ /amount/) amt = 1
+    o = gsub(/\(/, "(", line); c = gsub(/\)/, ")", line); depth += o - c
+    if (depth <= 0) open = 0
+  }
+  END { flush() }')
+sub "trackEvent payments (amount + paymentId + currency in the event data = revenue on the new majors)"
+PAYS=$(printf '%s\n' "$PAY_SCAN" | awk -F'\t' '$1=="PAY"{print "   " $2 "  " ($3==""?"(dynamic name)":$3)}' | sed 's|^   \./|   |' | head -20)
+[ -n "$PAYS" ] && echo "$PAYS" || say "none found (revenue may go through capturePayment, a wrapper, or the backend)"
+MISS=$(printf '%s\n' "$PAY_SCAN" | awk -F'\t' '$1=="MISS"{print "   " $2 "  " $3 "  missing: " $4}' | sed 's|^   \./|   |' | head -12)
+[ -n "$MISS" ] && { sub "payment with paymentId but no amount/currency nearby - the SDK rejects it and nothing is sent"; echo "$MISS"; }
+CASE=$(printf '%s\n' "$PAY_SCAN" | awk -F'\t' '$1=="CASE"{print "   " $2 "  \"" $3 "\" - old type is \"" $4 "\" (names match exactly)"}' | sed 's|^   \./|   |' | head -12)
+[ -n "$CASE" ] && { sub "payment event name looks like an old type in the wrong case - existing Meta/Google/SKAN mappings will not match"; echo "$CASE"; }
+DEPR=$(grep -rnE "(capturePayment|CapturePayment|removePayment|RemovePayment)\s*[(<]|CapturePaymentRequest|RemovePaymentRequest|LRCapturePayment|LRRemovePayment" \
+  "${EXC[@]}" "${INC[@]}" . 2>/dev/null | grep -vE '^[^:]+:[0-9]+:\s*(//|#|\*|/\*)' | head -20)
+[ -n "$DEPR" ] && { sub "deprecated capturePayment/removePayment (still work on the new majors - recommend migration via 'npx @linkrunner/skills add migrate-payments', not an error)"; echo "$DEPR" | sed 's|^\./|   |'; }
+
 # ---------------------------------------------------------------- 4. hygiene smells
 hdr "4. Hygiene smells (verify each by reading the file - many are false positives)"
 smell() { local label="$1"; shift; local out; out=$("$@" 2>/dev/null | head -12); [ -n "$out" ] && { sub "$label"; echo "$out" | sed 's|^\./|   |'; }; }
@@ -194,10 +250,12 @@ for pair in "init:initialize|init|initializeSDK|Initialize" "signup:signup|Signu
     getAttributionData) note=$([ "$n" = 0 ] && echo "NOT CALLED - deferred deep linking is dead" || echo "verify the returned deeplink is actually routed") ;;
     signup) note=$([ "$n" = 0 ] && echo "NOT CALLED - installs never tie to a user" || echo "") ;;
     handleDeeplink) note=$([ "$n" = 0 ] && echo "NOT CALLED - no re-engagement / reattribution" || echo "need BOTH cold-start and warm-start paths") ;;
+    capturePayment|removePayment) note=$([ "$n" = 0 ] && echo "" || echo "deprecated on the new majors - recommend migrate-payments (Low), not an error") ;;
     *) note="" ;;
   esac
   printf '   %-20s %2s  %s\n' "$label" "$n" "$note"
 done
+printf '   %-20s %2s  %s\n' "trackEvent payment" "$(printf '%s\n' "$PAY_SCAN" | grep -c '^PAY')" "trackEvent calls carrying paymentId (revenue on the new majors)"
 say ""
 say "A 0 here is a LEAD, not a finding: the call may be behind a wrapper, in another package"
 say "of a monorepo, or named differently. Confirm by reading the code before reporting it."

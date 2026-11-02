@@ -44,7 +44,7 @@ grep -rn "LinkrunnerService.initialize\|LinkrunnerService.trackEvent" --exclude-
 ```
 
 Watch for wrappers that **rename** the concept - `AnalyticsService.identify()` may be `signup` underneath,
-`Tracker.logPurchase()` may be `capturePayment`. Map wrapper name → SDK method once, then work in the
+`Tracker.logPurchase()` may be `capturePayment` or a `trackEvent` payment. Map wrapper name → SDK method once, then work in the
 team's vocabulary; your fix diffs should be written against *their* wrapper, which is what they'll edit.
 
 Also check the wrapper itself for behaviour that changes the verdict: an internal `if (initialized) return`
@@ -231,6 +231,25 @@ has one.
 **`amount` as a string.** `amount: "149.99"` or `amount: total.toFixed(2)` - ad-network revenue sharing
 needs a number. Check the type at the call site *and* where the value came from.
 
+**`trackEvent` payment missing a key.** On the new majors a payment is `trackEvent` with `amount`,
+`paymentId` **and** `currency` in the event data. `paymentId` without `currency` (or `amount`) is rejected
+by the SDK and nothing is sent; `amount` without `paymentId`/`currency` is just a custom event, so no
+revenue is recorded. A hardcoded or locale-derived `currency` that does not match what the user paid in is
+a revenue finding too - ask where the real currency lives.
+
+**Wrong-case payment event name.** The event name is stored exactly as sent and mapped exactly. After a
+migration, `trackEvent("first_payment", …)` or `"FirstPayment"` where the app used `FIRST_PAYMENT` (or
+`"DEFAULT_PAYMENT"` for Flutter's `PaymentType.DEFAULT_PAYMENT`, which was stored as `DEFAULT`) silently
+stops reaching Meta, Google and SKAN mappings. Compare against the old `type` and the dashboard mappings.
+The same `paymentId` sent under two event names also counts twice.
+
+**Deprecated `capturePayment` / `removePayment`.** On a pinned SDK at or above the new majors (Android, iOS,
+Flutter 5.0.0; `rn-linkrunner`/`expo-linkrunner` 4.0.0; `capacitor-linkrunner` 3.0.0; `cordova-linkrunner`
+2.0.0) these still work and show a deprecation warning, so they are **not** an error. Report one Low
+finding listing the call sites, recommending migration with the migrate-payments skill
+(`npx @linkrunner/skills add migrate-payments`). Below those versions they are the correct API; at most
+note the upgrade path.
+
 **Dynamic event names.**
 ```ts
 linkrunner.trackEvent(`${category}_viewed`, …)   // unbounded, unqueryable in the dashboard
@@ -247,7 +266,7 @@ screen view or every launch with an unchanged payload they are pure duplicate tr
 as another record downstream. Fix: call once when the value first becomes available, or diff against the last
 value sent before calling.
 
-**`capturePayment` on the wrong event.** In the checkout screen body, on "Pay" tap, or in a `finally` -
+**Payment call (`trackEvent` payment or `capturePayment`) on the wrong event.** In the checkout screen body, on "Pay" tap, or in a `finally` -
 instead of in the success callback / verified-webhook path. Look for the payment SDK's own success handler
 and check whether the Linkrunner call is inside it.
 

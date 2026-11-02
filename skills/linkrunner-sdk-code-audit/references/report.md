@@ -57,10 +57,10 @@ Lead with the answer, not the process.>
 
 | Severity | Means | Examples |
 |---|---|---|
-| **Critical** | Data is wrong or absent in a way that misleads decisions or spend | `init` never runs in production; unstable `paymentId` inflating revenue; missing `INTERNET`; wrong project token |
+| **Critical** | Data is wrong or absent in a way that misleads decisions or spend | `init` never runs in production; unstable `paymentId` inflating revenue; payment missing `currency` (rejected) or with a wrong-case old type name (unmapped); missing `INTERNET`; wrong project token |
 | **High** | A whole feature silently doesn't work | Deferred deep link never routed; App Links not verified; `signup` missing on login |
 | **Medium** | Degraded accuracy or duplicate load | No backup rules; `setAdditionalData` on every launch; stale push token |
-| **Low** | Hygiene, or a risk that hasn't bitten yet | Empty catch; old pinned SDK version; `debug: true` on a debug-only path |
+| **Low** | Hygiene, or a risk that hasn't bitten yet | Empty catch; old pinned SDK version; `debug: true` on a debug-only path; deprecated `capturePayment`/`removePayment` still in use (migrate with `npx @linkrunner/skills add migrate-payments`) |
 | ✅ **Correct** | Verified right - state it explicitly | `init` at app entry, once; events on real actions |
 
 Anything you could not determine is **not** a severity - it goes in Limits.
@@ -92,8 +92,9 @@ it from the findings. Mark every row.
 | `setCustomerUserId` | ❌ absent (SDK 2.10.1 - needs ≥ 2.11.0) | - |
 | `setUserData` | ✅ | `auth/session.ts:44` |
 | `trackEvent` | ✅ 14 events, static names | `events/` |
-| `capturePayment` | ⚠️ unstable paymentId | `checkout/pay.ts:212` |
-| `removePayment` | - not used (no refund flow) | - |
+| payments (`trackEvent` with `amount`+`paymentId`+`currency`, or `capturePayment`) | ⚠️ unstable paymentId | `checkout/pay.ts:212` |
+| refunds (`PAYMENT_CANCELLED`, or `removePayment`) | - not used (no refund flow) | - |
+| deprecated `capturePayment`/`removePayment` | - none / ⚠️ N calls to migrate (Low) | - |
 | `setAdditionalData` | - no third-party integration | - |
 | `setPushToken` | ⚠️ startup only, not on refresh | `push/setup.ts:19` |
 | `getAttributionData` | ⚠️ fetched, never routed | `App.tsx:64` |
@@ -107,7 +108,7 @@ it from the findings. Mark every row.
 | Token / debug hygiene | ✅ env-driven | `.env`, `App.tsx:31` |
 ```
 
-`- n/a` is a real, useful verdict: "no refund flow exists, so `removePayment` is correctly absent" is
+`- n/a` is a real, useful verdict: "no refund flow exists, so a refund call is correctly absent" is
 information. Don't leave a row blank.
 
 ## 5. Limits - always include

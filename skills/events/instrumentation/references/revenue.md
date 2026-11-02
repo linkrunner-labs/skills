@@ -1,77 +1,129 @@
 # Revenue tracking correctness
 
-Source of truth: https://docs.linkrunner.io/api-reference/revenue-tracking
+Source of truth: https://docs.linkrunner.io/sdk/track-payments and
+https://docs.linkrunner.io/api-reference/event-capture#payment-fields
 
-Revenue goes through `capturePayment` client-side, or the Capture Payment API
-server-side (`references/server-side.md`) - **not** `trackEvent`/Capture
-Event. The docs explicitly recommend capture-payment over capture-event for
-revenue, since it carries dedup guarantees capture-event doesn't. For the
-exact client call in your language, see
+A payment is an in-app event with revenue. Client-side, send it with
+`trackEvent` and put `amount`, `paymentId` and `currency` together in
+`eventData`, plus `userId`. Server-side, send `POST /capture-event` with
+`amount`, `payment_id` and `currency` at the top level
+(`references/server-side.md`). For the exact client call in your language, see
 `skills/sdk/<platform>/references/events.md`.
 
 ```
-capturePayment({ userId, amount, paymentId, type, status, eventData })  // client
-removePayment({ userId, paymentId })                                    // client
-POST /capture-payment  /  POST /remove-payment                          // server-side
+trackEvent(eventName, { amount, paymentId, currency, userId, status?, ...productFields })  // client
+POST /capture-event  { event_name, amount, payment_id, currency, user_id, status?, event_data? }  // server-side
 ```
+
+`trackEvent` payments need these SDK versions or later:
+
+| Platform | Package | Minimum |
+| --- | --- | --- |
+| Android | `io.linkrunner:android-sdk` | 5.0.0 |
+| iOS | LinkrunnerKit | 5.0.0 |
+| Flutter | `linkrunner` | 5.0.0 |
+| React Native | `rn-linkrunner` | 4.0.0 |
+| Expo | `expo-linkrunner` | 4.0.0, with `rn-linkrunner` 4.0.0+ |
+| Capacitor | `capacitor-linkrunner` | 3.0.0 |
+| Cordova | `cordova-linkrunner` | 2.0.0 |
+| Unity | bridges | built on Android SDK 5.0.0 and LinkrunnerKit 5.0.0 |
+
+On these versions `capturePayment` and `removePayment` are **deprecated**: they
+still work, show an IDE deprecation warning, and will be removed in a future
+major version. On older versions they are the only payment API. To move an app
+over, use the migrate-payments skill
+(`npx @linkrunner/skills add migrate-payments`). `POST /capture-payment` is
+deprecated for app payments but keeps working; website payments still use it with `"source": "web"`
+(`references/server-side.md`).
 
 ## Fields
 
-- `user_id` - **required**. Must match a user already registered via
-  `signup()`; revenue is only stored and displayed for attributed users.
-- `amount` - **required**, one currency only. If you accept payments in
-  multiple currencies, convert to a single currency before calling.
-- `payment_id` - optional but recommended, unique per transaction. See dedup below.
-- `type` - optional, defaults to `DEFAULT`. One of: `FIRST_PAYMENT`,
-  `SECOND_PAYMENT`, `WALLET_TOPUP`, `FUNDS_WITHDRAWAL`,
-  `SUBSCRIPTION_CREATED`, `SUBSCRIPTION_RENEWED`, `ONE_TIME`, `RECURRING`,
-  `DEFAULT`.
-- `status` - optional, defaults to `PAYMENT_COMPLETED`. One of:
+- **Event name** (`eventName` / `event_name`) - **required**. It becomes the
+  payment type, is stored exactly as sent, and is matched exactly (letter case
+  included) against Meta, Google, SKAN and affiliate mappings. Old payment
+  types keep their uppercase spelling: `FIRST_PAYMENT`, `SECOND_PAYMENT`,
+  `TRIAL_STARTED`, `TRIAL_CANCELLED`, `WALLET_TOPUP`, `FUNDS_WITHDRAWAL`,
+  `SUBSCRIPTION_CREATED`, `SUBSCRIPTION_RENEWED`, `SUBSCRIPTION_CANCELLED`,
+  `SUBSCRIPTION_REFUNDED`, `SUBSCRIPTION_BILLING_ISSUE`, `DEFAULT`, `ONE_TIME`,
+  `RECURRING`. `first_payment` is a new type that no existing mapping matches.
+  A new name such as `purchase` works, but needs a dashboard mapping per ad
+  network before release, or the payment is saved but never sent.
+- `amount` - **required**. A number, 0 or more, the order total. Linkrunner
+  does not add up item prices.
+- `paymentId` / `payment_id` - **required**, non-blank. Your real order or
+  transaction id, never a random value generated at send time.
+- `currency` - **required**. 3-letter ISO 4217 code of `amount` (`INR`,
+  `USD`). Never guess it from locale or country; a wrong code makes revenue
+  wrong in every report and ad network.
+- `userId` / `user_id` - **required** for SDK payments. `""` uses the user
+  saved by `signup`, `setUserData` or `setCustomerUserId`. Send it from the
+  backend too.
+- `status` - optional, defaults to `PAYMENT_COMPLETED`. One of
   `PAYMENT_INITIATED`, `PAYMENT_COMPLETED`, `PAYMENT_FAILED`,
-  `PAYMENT_CANCELLED`.
-- `event_data` - optional. Use for the Meta ecommerce `Purchase` fields (see
-  `references/ecommerce-events.md`) or any other custom attributes.
+  `PAYMENT_CANCELLED`. Only `PAYMENT_COMPLETED` counts as revenue and is sent
+  to ad networks.
+- Other `eventData` keys - optional. Product fields for Meta and Google (see
+  `references/ecommerce-events.md`) or any custom attributes.
+
+What makes it a payment:
+
+- `amount`, `paymentId` and `currency` all present: a payment.
+- `amount` or `currency` without `paymentId`: a normal custom event, not
+  revenue. An `amount` inside `event_data` on the server never makes a payment.
+- `paymentId` with `amount` or `currency` missing: the SDK rejects it and
+  nothing is sent. How it reports that differs per platform; see the
+  platform's `events.md`. On the server API the same request is stored as a
+  custom event (`200`).
 
 ## Deduplication
 
-Deduplication is idempotent on the **`(type, payment_id)` combination**. For
-each unique combination, only one record is created - a second call with the
-same `type` + `payment_id` is silently ignored. This is what makes retries
-safe.
+Linkrunner keeps one payment per **`paymentId` + event name + `status`**. A
+second call with the same three values is ignored (the API still returns
+`200`). This is what makes retries safe.
 
-**The failure mode runs both ways:**
+**The failure mode runs several ways:**
 
-- Reusing the same `payment_id` (or a constant/empty one) across genuinely
-  different transactions of the same `type` causes every payment after the
-  first to be dropped, not recorded twice - this reads as "missing revenue,"
-  not double-counting. Always generate a fresh, unique `payment_id` per real
-  transaction.
-- Calling `capturePayment` both from the client SDK and from your backend for
-  the same transaction, with two different `payment_id` values (or one side
-  omitting it), produces two separate records for one payment - this is the
-  actual double-counting case. Pick one call site per transaction, or make
-  sure both sides pass the identical `payment_id`.
+- Reusing the same `paymentId` (or a constant one) across genuinely different
+  transactions with the same name and status drops every payment after the
+  first. This reads as "missing revenue", not double-counting. Use a fresh id
+  per real charge; every subscription renewal is its own payment.
+- The same `paymentId` sent under **two event names** counts as two payments.
+  Pick one name per kind of payment and keep it across releases.
+- Sending `PAYMENT_INITIATED` and then `PAYMENT_COMPLETED` for one order
+  stores two entries. That is expected: only the completed one is revenue.
+- Sending the same purchase from both the client SDK and your backend with
+  different ids or names counts it twice. Pick one source, or send the
+  identical `paymentId` and event name from both.
 
-## Refunds / removing payments
+## Refunds / cancellations
 
-`removePayment` needs either `payment_id` or `user_id`.
+Send the **same event name and `paymentId`**, the original `amount` and
+`currency`, and `status` `PAYMENT_CANCELLED`. That payment then no longer
+counts as revenue and nothing is sent to ad networks.
 
-**Passing only `user_id` removes all payments attributed to that user, not
-just one.** To remove a single transaction, always pass its `payment_id`.
+Deprecated `removePayment` still works on the new SDK versions. It needs
+`paymentId` or `userId`; **passing only `userId` removes all of that user's
+payments**. When migrating a `removePayment` call that has no event name,
+amount or currency available, leave it in place rather than guessing.
 
 ## Meta ecommerce `Purchase` events
 
-To sync payments to Meta Catalog Sales, map the payment `type` you use (e.g.
-`DEFAULT` or `FIRST_PAYMENT`) to `Purchase` in the Linkrunner dashboard (Meta
-Ads → Event Mapping), and include the ecommerce fields in `event_data`:
-`content_ids`/`item_group_ids`, `contents`, `content_type`, `currency`,
-`value`, `num_items`, and `order_id` (required for `Purchase`). Field
-definitions and examples: `references/ecommerce-events.md`.
+To sync payments to Meta Catalog Sales, map the payment event name you use
+(e.g. `purchase`, `DEFAULT` or `FIRST_PAYMENT`) to `Purchase` in the
+Linkrunner dashboard (Meta Ads → Event Mapping). Meta gets the value and
+currency from the payment `amount` and `currency`, and reads `content_ids`,
+`contents`, `content_type`, `num_items` and `order_id` from the event data.
+Google reads `content_ids` as item ids. Field definitions:
+`references/ecommerce-events.md`.
 
 Note: `MobileAppInstall` and `CompleteRegistration` are sent to Meta
-automatically - no mapping or `capturePayment` call needed for those.
+automatically - no mapping or payment call needed for those.
 
 ## Verify
 
-- Dashboard → [Events Settings](https://dashboard.linkrunner.io/dashboard/settings/events) to confirm the payment is captured.
-- If revenue isn't showing in Meta/Google: confirm "Send Revenue" is enabled on the event mapping, the currency is correct, and the app is actually sending a numeric `amount`/`value`.
+- Dashboard → [Events Log](https://dashboard.linkrunner.io/dashboard/events):
+  the row should show the payment with its Amount, Currency, Payment ID and
+  Payment Status.
+- If revenue isn't showing in Meta/Google: the status must be
+  `PAYMENT_COMPLETED`, the event name must have a mapping with the exact same
+  name, and **Send Revenue** must be on for that mapping.

@@ -89,6 +89,7 @@ Before writing "the app never calls X", check whether their pinned version even 
 | Uninstall tracking | ≥ 2.8.0 | - | - | - | - | - |
 | `setConsent` / Google ICM | ≥ 3.1.0 | - | ≥ 4.1.0 | - | - | - |
 | AAID collection disable | - | ≥ 3.5.0 | ≥ 3.5.0 | n/a | - | - |
+| Payments via `trackEvent` (`capturePayment`/`removePayment` deprecated) | ≥ 4.0.0 (Expo: `expo-linkrunner` ≥ 4.0.0) | ≥ 5.0.0 | ≥ 5.0.0 | ≥ 5.0.0 | ≥ 3.0.0 | ≥ 2.0.0 |
 
 Verify a gate against the live docs (`https://docs.linkrunner.io/sdk/<platform>`) before citing it -
 minimums move as SDKs ship. A dash means the doc doesn't state a minimum for that platform, not that the

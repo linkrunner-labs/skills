@@ -13,8 +13,9 @@ Learn the table once and you can audit any stack.
 | own user id | `setCustomerUserId` | `setCustomerUserId` | `setCustomerUserId` | `setCustomerUserId` | *(check docs)* |
 | user details | `setUserData` | `setUserData` | `setUserData` | `setUserData` | `SetUserData` |
 | custom event | `trackEvent` | `trackEvent` | `trackEvent` | `trackEvent` | `TrackEvent` |
-| revenue | `capturePayment` | `capturePayment` | `capturePayment` | `capturePayment` | `CapturePayment` |
-| refund | `removePayment` | `removePayment` | `removePayment` | `removePayment` | `RemovePayment` |
+| revenue (new majors) | `trackEvent` + payment keys | `trackEvent` + payment keys | `trackEvent` + payment keys | `trackEvent` + payment keys | `TrackEvent` + payment keys in the JSON |
+| refund (new majors) | `trackEvent`, `status: PAYMENT_CANCELLED` | same | same | same | same |
+| revenue / refund (deprecated) | `capturePayment` / `removePayment` | `capturePayment` / `removePayment` | `capturePayment` / `removePayment` | `capturePayment` / `removePayment` | `CapturePayment` / `RemovePayment` (old bridges) |
 | 3rd-party ids | `setAdditionalData` | `setAdditionalData` | `setAdditionalData` | `setAdditionalData` | `SetAdditionalData` |
 | push token | `setPushToken` | `setPushToken` | `setPushToken` | `setPushToken` | `SetPushToken` |
 | attribution / deferred DL | `getAttributionData` | `getAttributionData` | `getAttributionData` | `getAttributionData` | `GetAttributionData` |
@@ -29,6 +30,12 @@ Notes that catch people out:
   It is also callback-driven: `Initialize`/`GetAttributionData` return `void` and deliver results via
   `OnInitialized` / `OnAttributionData` / `OnDeeplinkHandled` events. A Unity app that calls
   `GetAttributionData` but subscribes to no handler has a dead chain - the exact bug to look for there.
+- **Payments are `trackEvent` from the new majors.** Android, iOS and Flutter 5.0.0, `rn-linkrunner`
+  and `expo-linkrunner` 4.0.0, `capacitor-linkrunner` 3.0.0, `cordova-linkrunner` 2.0.0, Unity bridges on
+  native 5.0.0. A `trackEvent` whose event data has `amount`, `paymentId` **and** `currency` is a payment
+  (revenue); count those call sites as revenue coverage. `amount` or `currency` without `paymentId` is a
+  plain custom event, not revenue. `capturePayment` / `removePayment` are **deprecated** on those versions
+  (still work, IDE warning, removed in a future major) and the only payment API below them.
 - **Web is a different, smaller surface**: `lr.identify(userId)` and `lr.track(...)`, loaded via the CDN
   script or `@linkrunner/web`. Page views are automatic. Don't apply the mobile cadence rules to it.
 
@@ -46,8 +53,10 @@ inspect network traffic or debug logs.
 | `setCustomerUserId` | *(SDK-managed)* | Right after `init`, as soon as the id is known | When the id becomes known/changes | Called with an unstable id (session id, device id regenerated per launch) |
 | `setUserData` | `/api/client/set-user-data` | Auth logic, after `signup` | When user details actually **change** | Fires on every launch / profile view with an unchanged payload |
 | `trackEvent` | `/api/client/capture-event` | Throughout the app | On a real user action | Fires on plain screen render/scroll; or the name is built dynamically |
-| `capturePayment` | `/api/client/capture-payment` | Payment processing | On payment **success** only | In the screen body, on checkout open, or on every retry |
-| `removePayment` | `/api/client/remove-captured-payment` | Refund flow | On refund/cancellation | - (rarely present; absence is fine) |
+| `trackEvent` (payment) | `/api/client/capture-event` (payment fields) | Payment processing | On each payment state you track; `PAYMENT_COMPLETED` (the default) on **success** only | Completed status sent on checkout open, in the screen body, or with a fresh `paymentId` on every retry |
+| `trackEvent`, `PAYMENT_CANCELLED` | `/api/client/capture-event` | Refund flow | On refund/cancellation, same event name + `paymentId` | - (rarely present; absence is fine) |
+| `capturePayment` *(deprecated)* | `/api/client/capture-payment` | Payment processing | On payment **success** only | Same as above; on SDK ≥ the new majors also a migration finding |
+| `removePayment` *(deprecated)* | `/api/client/remove-captured-payment` | Refund flow | On refund/cancellation | - (rarely present; absence is fine) |
 | `setAdditionalData` | `/api/client/integrations` | Integration setup code | **Once**, when a third-party id (e.g. CleverTap) first becomes available | On a screen view or every launch - it has no client-side dedup |
 | `setPushToken` | `/api/client/update-push-token` | Push setup / token-refresh callback | When the FCM/APNs token changes | Called once at startup only, never on refresh → uninstall tracking degrades |
 | `getAttributionData` | `/api/client/attribution-data` | After `init` | When attribution / the deferred deep link is needed | Never called (deferred deep linking is dead), or called and the result discarded |
@@ -64,9 +73,15 @@ line:
 
 **Required / load-bearing - flag when wrong or absent:**
 - `signup` → `user_data.id` - a **stable** identifier from the app's own system.
-- `capturePayment` → `amount` (a **number**), `userId`, and `paymentId` - `paymentId` must be the
-  **payment provider's or your backend's stable id**, because the server deduplicates on it.
-- `removePayment` → `userId`.
+- `trackEvent` payment → event name, `amount` (a **number**, ≥ 0), `paymentId`, `currency` (3-letter ISO
+  4217) and `userId` (`""` = the user saved by `signup`) all in the event data. `paymentId` must be the
+  **payment provider's or your backend's stable id**: the server deduplicates on `paymentId` + event name +
+  `status`. `paymentId` with `amount` or `currency` missing is rejected and nothing is sent.
+- The payment **event name** is stored exactly as sent and matched exactly against Meta, Google, SKAN and
+  affiliate mappings. A migrated old type must keep its uppercase spelling (`FIRST_PAYMENT`, `DEFAULT`,
+  ...); `first_payment` or `FirstPayment` is a new, unmapped payment type.
+- `capturePayment` *(deprecated)* → `amount` (a **number**), `userId`, and a stable `paymentId`.
+- `removePayment` *(deprecated)* → `userId`.
 - `trackEvent` → `eventName`, a **static string**.
 - `init` → the project token, and `debug` **false** on release paths.
 
@@ -75,13 +90,17 @@ line:
   duplicate event at the emitter instead.
 - `name`, `phone`, `email`, `user_created_at`, `is_first_time_user`, `mixpanel_distinct_id`,
   `amplitude_device_id`, `posthog_distinct_id` on `signup`/`setUserData`.
-- `type` and `status` on `capturePayment` (default `DEFAULT` / `PAYMENT_COMPLETED`).
+- `status` on a `trackEvent` payment (default `PAYMENT_COMPLETED`); `type` and `status` on `capturePayment`
+  (default `DEFAULT` / `PAYMENT_COMPLETED`).
 - `paymentId` on `removePayment` (omitting it removes all of that user's payments - intentional).
 - `secretKey`/`keyId` (SDK signing) - only required if the project enforces signing.
 
 **Enum values worth checking against the docs** (a typo silently degrades to the default):
-`type` ∈ `FIRST_PAYMENT | WALLET_TOPUP | FUNDS_WITHDRAWAL | SUBSCRIPTION_CREATED | SUBSCRIPTION_RENEWED |
-ONE_TIME | RECURRING | DEFAULT`; `status` ∈ `PAYMENT_INITIATED | PAYMENT_COMPLETED | PAYMENT_FAILED |
+old payment types (a `capturePayment` `type`, or a payment event name that must keep matching existing
+mappings) ∈ `FIRST_PAYMENT | SECOND_PAYMENT | TRIAL_STARTED | TRIAL_CANCELLED | WALLET_TOPUP |
+FUNDS_WITHDRAWAL | SUBSCRIPTION_CREATED | SUBSCRIPTION_RENEWED | SUBSCRIPTION_CANCELLED |
+SUBSCRIPTION_REFUNDED | SUBSCRIPTION_BILLING_ISSUE | DEFAULT | ONE_TIME | RECURRING` (uppercase, exactly);
+`status` ∈ `PAYMENT_INITIATED | PAYMENT_COMPLETED | PAYMENT_FAILED |
 PAYMENT_CANCELLED`; consent signals ∈ `granted | denied | unknown`.
 
 ## 4. Ecommerce and revenue-sharing payloads
@@ -101,8 +120,10 @@ await linkrunner.trackEvent("add_to_cart", {
 });
 ```
 
-For plain revenue sharing on a custom event, `amount` must be present **as a number**:
-`trackEvent("purchase_completed", { amount: 149.99 })`. `amount: "149.99"` is a real finding - check the
+Revenue reaches ad networks only as a **payment**: on the new majors, `amount`, `paymentId` and `currency`
+together in the event data, `amount` **as a number** (the order total). On those versions a
+`trackEvent("purchase_completed", { amount: 149.99 })` with no `paymentId`/`currency` is ordinary event data,
+not revenue - a finding if the team expects it to count. `amount: "149.99"` is a real finding - check the
 type at the call site, including whether an upstream `toString()`/template literal made it a string.
 
 Requires the Ecommerce Event Manager minimum version - see `detect-stack.md` §4.

@@ -8,7 +8,7 @@ Source of truth: https://docs.linkrunner.io/sdk/android
 
 ```gradle
 dependencies {
-    implementation 'io.linkrunner:android-sdk:3.10.0'
+    implementation 'io.linkrunner:android-sdk:5.0.0'
 }
 ```
 
