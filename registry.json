@@ -127,8 +127,19 @@
       "aliases": ["events", "revenue", "ecommerce", "trackevent", "purchases"],
       "path": "skills/events/instrumentation",
       "title": "Linkrunner - event & revenue instrumentation",
-      "description": "Instrument Linkrunner events and revenue correctly: standard ecommerce taxonomy, capturePayment/removePayment with dedupe and refunds, and the server-side Capture Event / Revenue Tracking APIs. Platform-agnostic; defers exact call syntax to your SDK skill.",
+      "description": "Instrument Linkrunner events and revenue correctly: standard ecommerce taxonomy, payments sent with trackEvent (amount, paymentId, currency) with dedupe and refunds, the deprecated capturePayment/removePayment, and the server-side Capture Event / Revenue Tracking APIs. Platform-agnostic; defers exact call syntax to your SDK skill.",
       "docs": "https://docs.linkrunner.io/api-reference/event-capture",
+      "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
+    },
+    {
+      "id": "linkrunner-migrate-payments",
+      "category": "events",
+      "slug": "migrate-payments",
+      "aliases": ["migrate-payments", "migrate-capture-payment", "capture-payment-migration", "payments-to-trackevent"],
+      "path": "skills/events/migrate-payments",
+      "title": "Linkrunner - migrate payments to trackEvent",
+      "description": "Migrate the deprecated capturePayment and removePayment calls to trackEvent: detects the platform and SDK version, upgrades to the version where capturePayment is deprecated, rewrites each call with the exact same payment name so ad-network mappings keep working, and verifies nothing is left.",
+      "docs": "https://docs.linkrunner.io/sdk/migrate-to-track-event",
       "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
     },
     {

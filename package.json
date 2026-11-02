@@ -1,6 +1,6 @@
 {
   "name": "@linkrunner/skills",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Installable Agent Skills for Linkrunner SDK integration, troubleshooting, instrumentation, and brand-consistent design.",
   "type": "module",
   "bin": {
@@ -19,7 +19,7 @@
   },
   "scripts": {
     "list": "node bin/cli.mjs list",
-    "test": "node bin/cli.mjs add flutter --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add flutter --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add code-audit --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add code-audit --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add setup-with-mcp --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add setup-with-mcp --agent cursor --dir ./.smoke --dry-run"
+    "test": "node bin/cli.mjs add flutter --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add flutter --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add branding --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add code-audit --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add code-audit --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add setup-with-mcp --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add setup-with-mcp --agent cursor --dir ./.smoke --dry-run && node bin/cli.mjs add migrate-payments --agent claude-code --dir ./.smoke --dry-run && node bin/cli.mjs add migrate-payments --agent cursor --dir ./.smoke --dry-run && bash -n skills/events/migrate-payments/scripts/find-payment-calls.sh"
   },
   "keywords": [
     "linkrunner",
