@@ -111,6 +111,22 @@ to the standard commerce event in the Linkrunner Dashboard. Purchases go
 through `capturePayment` with the same ecommerce payload in `eventData`, plus
 `order_id`. See the docs for the full field reference.
 
+### Event parameters: one event, not one per variant
+
+Send one event with parameters, not one event per variant: send `purchase`
+with `{ plan: "gold" }`, not `purchase_gold` and `purchase_silver`. One event
+name keeps funnels, campaign columns and postback mappings simple, and the
+dashboard can filter and break down by `plan`.
+
+```javascript
+await linkrunner.trackEvent("purchase", { plan: "gold" }); // not purchase_gold / purchase_silver
+```
+
+Keep keys top-level and values flat and short, use the same key names and
+value types every time for an event, and never put PII in them. The same
+applies to the `eventData` you pass to `capturePayment`. See
+[Event parameters](https://docs.linkrunner.io/features/event-parameters).
+
 ## Attribution + resolved deeplink
 
 ```javascript

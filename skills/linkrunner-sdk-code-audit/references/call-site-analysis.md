@@ -231,15 +231,18 @@ has one.
 **`amount` as a string.** `amount: "149.99"` or `amount: total.toFixed(2)` - ad-network revenue sharing
 needs a number. Check the type at the call site *and* where the value came from.
 
-**Dynamic event names.**
+**Dynamic event names, or one event per variant.**
 ```ts
 linkrunner.trackEvent(`${category}_viewed`, …)   // unbounded, unqueryable in the dashboard
+linkrunner.trackEvent('purchase_gold')           // one hardcoded name per variant
 ```
-Fix: a fixed name plus the variable part as event data -
-`trackEvent('content_viewed', { category })`.
+Fix: one event with parameters, not one event per variant - a fixed name plus the variable part as an
+event parameter: `trackEvent('content_viewed', { category })`, `trackEvent('purchase', { plan: 'gold' })`.
+The dashboard can filter and break down by event parameters, and one name keeps funnels, campaign columns
+and postback mappings simple.
 
 **PII in event payloads.** Emails, phone numbers, or full names inside `eventData`. `signup`/`setUserData`
-have dedicated fields for those; event properties should carry ids, not identities. Flag it as a privacy
+have dedicated fields for those; event parameters should carry ids, not identities. Flag it as a privacy
 finding, quote the key names, **never the values**.
 
 **`setAdditionalData` / `setUserData` on a render path.** These carry identity/config, not activity. On a

@@ -64,7 +64,8 @@ result.onSuccess { /* ... */ }.onFailure { error -> /* ... */ }
 
 ## Revenue
 
-Revenue is only stored for attributed users - `signup` must run first.
+Revenue is stored for every user, attributed or organic (organic payments
+have no campaign). Call `signup` first so payments are linked to a user.
 
 ```kotlin
 val paymentData = CapturePaymentRequest(
@@ -101,7 +102,8 @@ of that user's payments are removed.
 
 ## Custom / ecommerce events
 
-Events are only stored for attributed users - `signup` must run first. From
+Events are stored for every user, attributed or organic (organic events
+have no campaign). Call `signup` first so events are linked to a user. From
 **Android SDK v3.9.0**, `trackEvent` automatically includes the `user_id` set
 via `signup()`/`setUserData()` - no need to pass it manually. Events tracked
 before signup go out without a `user_id`.
@@ -128,6 +130,25 @@ must be mapped to the standard commerce event in the Linkrunner Dashboard.
 See [Meta Commerce Manager](https://docs.linkrunner.io/ecommerce-manager/meta-commerce-manager#understanding-event_data)
 for the full field reference. Purchases go through `capturePayment` (with
 `order_id` in `eventData`), not `trackEvent`.
+
+### Event parameters: one event, not one per variant
+
+Send one event with parameters, not one event per variant: send `purchase`
+with `{ plan: "gold" }`, not `purchase_gold` and `purchase_silver`. One event
+name keeps funnels, campaign columns and postback mappings simple, and the
+dashboard can filter and break down by `plan`.
+
+```kotlin
+LinkRunner.getInstance().trackEvent(
+    eventName = "purchase",
+    eventData = mapOf("plan" to "gold") // not purchase_gold / purchase_silver
+)
+```
+
+Keep keys top-level and values flat and short, use the same key names and
+value types every time for an event, and never put PII in them. The same
+applies to the `eventData` in `CapturePaymentRequest`. See
+[Event parameters](https://docs.linkrunner.io/features/event-parameters).
 
 ## Attribution + resolved deeplink
 

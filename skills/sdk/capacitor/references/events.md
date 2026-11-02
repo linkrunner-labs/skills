@@ -91,7 +91,8 @@ await linkrunner.removePayment({
 `removePayment` needs at least one of `paymentId` or `userId`. With only
 `userId`, all of that user's payments are removed.
 
-Revenue is only stored for attributed users - `signup` must run first.
+Revenue is stored for every user, attributed or organic (organic payments
+have no campaign). Call `signup` first so payments are linked to a user.
 
 ## Custom / ecommerce events
 
@@ -119,7 +120,24 @@ await linkrunner.trackEvent("purchase_completed", {
 ```
 
 Prefer `capturePayment` over `trackEvent` for actual purchases (see Revenue
-above). Events, like revenue, are only stored for attributed users.
+above). Events are stored for every user, attributed or organic (organic events
+have no campaign). Call `signup` first so events are linked to a user.
+
+### Event parameters: one event, not one per variant
+
+Send one event with parameters, not one event per variant: send `purchase`
+with `{ plan: "gold" }`, not `purchase_gold` and `purchase_silver`. One event
+name keeps funnels, campaign columns and postback mappings simple, and the
+dashboard can filter and break down by `plan`.
+
+```typescript
+await linkrunner.trackEvent("purchase", { plan: "gold" }); // not purchase_gold / purchase_silver
+```
+
+Keep keys top-level and values flat and short, use the same key names and
+value types every time for an event, and never put PII in them. The same
+applies to the `eventData` you pass to `capturePayment`. See
+[Event parameters](https://docs.linkrunner.io/features/event-parameters).
 
 ## Attribution + resolved deeplink
 

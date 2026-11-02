@@ -127,7 +127,7 @@
       "aliases": ["events", "revenue", "ecommerce", "trackevent", "purchases"],
       "path": "skills/events/instrumentation",
       "title": "Linkrunner - event & revenue instrumentation",
-      "description": "Instrument Linkrunner events and revenue correctly: standard ecommerce taxonomy, capturePayment/removePayment with dedupe and refunds, and the server-side Capture Event / Revenue Tracking APIs. Platform-agnostic; defers exact call syntax to your SDK skill.",
+      "description": "Instrument Linkrunner events and revenue correctly: standard ecommerce taxonomy, event parameters (one event with parameters, not one per variant), capturePayment/removePayment with dedupe and refunds, and the server-side Capture Event / Revenue Tracking APIs. Platform-agnostic; defers exact call syntax to your SDK skill.",
       "docs": "https://docs.linkrunner.io/api-reference/event-capture",
       "agentCompat": ["claude-code", "cursor", "windsurf", "copilot", "agents-md"]
     },
