@@ -43,7 +43,7 @@ A monorepo can have more than one. Migrate each app separately.
 
 ## 1. Pick the target version
 
-| Platform | Only `capturePayment` | `trackEvent` payments from |
+| Platform | Older versions | New versions (`capturePayment` deprecated) |
 | --- | --- | --- |
 | Android | 4.x | 5.0.0 |
 | iOS | 4.x | 5.0.0 |
@@ -60,6 +60,11 @@ registry before you edit anything (`npm view rn-linkrunner version`,
 `flutter pub outdated`, Maven Central, `pod search LinkrunnerKit`). If the
 target version is not published yet, stop and tell the user. Do not point a
 project at an unreleased version.
+
+Upgrade even if the backend already accepts the payment. On an older version
+the backend stores a `trackEvent` with `paymentId`, `amount`, `currency` and
+`userId` as a payment, but the SDK does not check it. A missing or invalid key
+leaves a custom event, and the app sees no error.
 
 ## 2. Inventory every payment call
 
@@ -126,6 +131,9 @@ mapping matches, and those payments silently stop reaching ad networks.
 
 Rules while rewriting:
 
+- Send each payment through one path only. Never call both `capturePayment`
+  and `trackEvent` for the same payment. The same `paymentId` under the same
+  name is stored once; under different names it counts twice.
 - Keep `amount`, `paymentId` and `currency` together. Only all three make the
   event a payment. `paymentId` with one of the others missing is rejected by
   the SDK and nothing is sent.
@@ -167,6 +175,12 @@ Backend calls to `POST /api/v1/capture-payment` keep working. To migrate them,
 call `POST /api/v1/capture-event` with `event_name` (same naming rule),
 `amount`, `payment_id` and `currency` at the top level next to `user_id`. See
 https://docs.linkrunner.io/api-reference/event-capture#payment-fields.
+
+If the backend already queues events, `POST /api/v1/capture-event/batch` takes
+up to 100 of them with the same fields. Check each event's result, because a
+`200` can still contain failed events. Pass `event_timestamp` (ISO 8601 with a
+timezone, at most 7 days old) when a payment is sent later than it happened, so
+it keeps its real time.
 
 ## 8. Verify
 

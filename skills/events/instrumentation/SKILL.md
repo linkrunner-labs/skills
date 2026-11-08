@@ -64,8 +64,11 @@ SDK skill (`skills/sdk/<platform>/references/events.md`) owns the exact
   together in `eventData`, plus `userId` (server: `POST /capture-event` with
   top-level `amount`, `payment_id`, `currency`). Needs the new SDK majors
   (Android/iOS/Flutter 5.0.0, rn-linkrunner/expo-linkrunner 4.0.0,
-  capacitor-linkrunner 3.0.0, cordova-linkrunner 2.0.0). `amount` or
-  `currency` without `paymentId` is just a custom event, not revenue.
+  capacitor-linkrunner 3.0.0, cordova-linkrunner 2.0.0), which check it on
+  the device. Older SDKs can send the same keys and the backend stores a
+  payment, but nothing is validated in the app. `amount` or `currency`
+  without `paymentId` is just a custom event, not revenue. Send each payment
+  through one path only, `capturePayment` or `trackEvent`.
 - `capturePayment` / `removePayment` / `POST /capture-payment` are deprecated
   on those versions (still work, removed in a future major). Don't add new
   calls; to move existing ones use the migrate-payments skill

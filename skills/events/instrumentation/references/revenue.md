@@ -28,6 +28,15 @@ POST /capture-event  { event_name, amount, payment_id, currency, user_id, status
 | Cordova | `cordova-linkrunner` | 2.0.0 |
 | Unity | bridges | built on Android SDK 5.0.0 and LinkrunnerKit 5.0.0 |
 
+Older SDK versions: the backend also stores a `trackEvent` as a payment when
+`eventData` has `paymentId`, `amount`, `currency` and `userId`, spelled exactly
+like that. The older SDK does not check it, so a missing or invalid key leaves
+a custom event and the app sees no error. Upgrade when you can.
+
+Send each payment through one path only, `capturePayment` or `trackEvent`. The
+same `paymentId` under the same name is stored once; under different names it
+counts twice.
+
 On these versions `capturePayment` and `removePayment` are **deprecated**: they
 still work, show an IDE deprecation warning, and will be removed in a future
 major version. On older versions they are the only payment API. To move an app

@@ -37,10 +37,11 @@ POST /capture-event
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `event_name` | string | **Required.** Name of the event. For a payment, the payment type (stored exactly as sent) |
-| `event_data` | object | Optional. Additional data, such as Meta/Google product fields. An `amount` in here does **not** make a payment |
+| `event_data` | object | Optional. Additional data, such as Meta/Google product fields. An `amount` in here does **not** make a payment on its own |
 | `user_id` | string | **Required** unless `install_instance_id` is sent. Always send it for payments |
 | `install_instance_id` | string | **Required** unless `user_id` is sent |
 | `event_id` | string | Optional. Your own id for the event |
+| `event_timestamp` | string | Optional. When the event happened, ISO 8601 with a timezone, for example `2026-01-31T10:15:30Z`. See below |
 | `amount` | number | Payment field. Order total, 0 or more |
 | `payment_id` | string | Payment field. Your unique transaction id, non-empty |
 | `currency` | string | Payment field. 3-letter ISO 4217 code |
@@ -68,11 +69,44 @@ matching. A retry with the same `payment_id`, `event_name` and `status` is
 not stored twice and still returns `200`. Refund: same `event_name` and
 `payment_id` with `status` `PAYMENT_CANCELLED`.
 
+**Older SDK shape:** when no top-level payment field is sent and `event_data`
+has `paymentId`, `amount`, `currency` and `userId` in camelCase, the event is
+also stored as a payment. If one of them is missing or invalid it stays a
+custom event and still returns `200`. `payment_id` inside `event_data` is not
+read. Send new server code with the top-level fields.
+
+**One path per payment:** send a payment through Capture Event or Capture
+Payment, not both. The same payment id under the same name is stored once;
+under different names it counts twice.
+
+**Event time:** `event_timestamp` records when the event or payment happened,
+useful when you queue events and send them later. It can be at most 7 days in
+the past and 10 minutes in the future, or the request returns `400`. Leave it
+out if the event is happening now. For `"source": "web"` events it is saved,
+but Web Events reports and postbacks still use the receive time.
+
 Responses: `200` event or payment captured, `400` missing or invalid
-parameters (including an invalid payment field when all three are sent), `401` invalid server key.
+parameters (including an invalid payment field when all three are sent, or a
+bad `event_timestamp`), `401` invalid server key.
 
 For the ecommerce (`AddToCart`/`ViewContent`) field requirements, see
 `references/ecommerce-events.md`.
+
+## Capture Events in a Batch
+
+```
+POST /capture-event/batch
+```
+
+Use it when a backend sends many events, for example from a queue. The body is
+`{ "events": [ ... ] }` with 1 to 100 events, at most 1 MB in total. Each event
+has the same format and rules as Capture Event, including payment fields and
+its own `event_timestamp`. Events are processed in order.
+
+A `200` can still contain rejected or failed events, even when all of them
+failed, so check each event's result and resend only those. `400` means the
+body is invalid and nothing was captured, `413` means it is over 1 MB, and
+`429` includes more than 5 batches per second from one server key.
 
 ## Capture Payment (deprecated for app payments)
 
