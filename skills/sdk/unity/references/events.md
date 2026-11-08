@@ -45,34 +45,70 @@ Subscribe: `LinkrunnerSDK.OnUserDataSet += (success, message) => { ... };`
 
 ## Revenue
 
-```csharp
-LinkrunnerSDK.CapturePayment(
-    userId: "user_123",
-    amount: 9.99,
-    paymentId: "pay_abc123",
-    type: "FIRST_PAYMENT",
-    status: "PAYMENT_COMPLETED"
-);
+A payment is a `trackEvent` call with `amount`, `paymentId` and `currency`
+together in `eventData`, plus `userId`. Needs the bridges built on Android SDK
+**5.0.0+** and LinkrunnerKit **5.0.0+** (older versions: see below). Revenue
+is stored for all users, including organic ones.
 
-// refund / undo
-LinkrunnerSDK.RemovePayment(userId: "user_123", paymentId: "pay_abc123");
+```csharp
+// Payment keys and product details in one JSON string
+string eventDataJson =
+    "{\"amount\":1499.0," +            // required: order total, a number >= 0
+    "\"paymentId\":\"order_123\"," +   // required: your order id, dedup key
+    "\"currency\":\"INR\"," +          // required: 3-letter ISO 4217
+    "\"userId\":\"user_123\"," +       // required: "" = user saved by Signup
+    "\"status\":\"PAYMENT_COMPLETED\"," + // optional, the default
+    "\"content_ids\":[\"sku_1\"],\"num_items\":1,\"order_id\":\"order_123\"}";
+
+// Subscribe once, for example in Awake
+LinkrunnerSDK.OnEventTracked += (success, message) =>
+{
+    if (!success) Debug.LogError($"Error tracking payment: {message}");
+};
+
+LinkrunnerSDK.TrackEvent("purchase", eventDataJson);
 ```
 
-`RemovePayment` needs `paymentId` or `userId`. With only `userId`, all of that
-user's payments are removed.
+- **The event name is the payment type.** It is stored exactly as sent and
+  matched exactly, letter case included, against Meta, Google, SKAN and
+  affiliate mappings. Old payment types keep their uppercase spelling:
+  `FIRST_PAYMENT`, `SECOND_PAYMENT`, `TRIAL_STARTED`, `TRIAL_CANCELLED`,
+  `WALLET_TOPUP`, `FUNDS_WITHDRAWAL`, `SUBSCRIPTION_CREATED`,
+  `SUBSCRIPTION_RENEWED`, `SUBSCRIPTION_CANCELLED`, `SUBSCRIPTION_REFUNDED`,
+  `SUBSCRIPTION_BILLING_ISSUE`, `DEFAULT`, `ONE_TIME`, `RECURRING`.
+  `first_payment` is a new type that no existing mapping matches, and any new
+  name (such as `purchase`) needs its own dashboard mapping before it reaches
+  ad networks.
+- Required: `amount` (a number, 0 or more, the order total), `paymentId` (your
+  stable order or transaction id, never a random value), `currency` (3-letter
+  ISO 4217, such as `INR`) and `userId` (`""` uses the user saved by `signup`
+  or `setUserData`).
+- `status` is optional: `PAYMENT_INITIATED`, `PAYMENT_COMPLETED` (default),
+  `PAYMENT_FAILED`, `PAYMENT_CANCELLED`. Only `PAYMENT_COMPLETED` counts as
+  revenue and is sent to ad networks.
+- `amount` or `currency` without `paymentId` is a normal custom event.
+  `paymentId` with `amount` or `currency` missing, a negative `amount`, a
+  blank `paymentId` or a non-3-letter `currency` is rejected and nothing is
+  sent: on Android `LinkrunnerSDK.OnEventTracked` reports `false` with the
+  error. On iOS the payment is dropped and debug builds log the reason.
+- Linkrunner keeps one payment per `paymentId` + event name + `status`, so
+  retries are safe. The same `paymentId` under two event names counts twice.
+- Refund or cancellation: same event name and `paymentId`, the original
+  `amount` and `currency`, and `status` `PAYMENT_CANCELLED`.
+- `amount` must be a JSON number, not a string.
 
-Payment types: `FIRST_PAYMENT`, `SECOND_PAYMENT`, `WALLET_TOPUP`,
-`FUNDS_WITHDRAWAL`, `SUBSCRIPTION_CREATED`, `SUBSCRIPTION_RENEWED`,
-`ONE_TIME`, `RECURRING`, `DEFAULT`.
+### Older SDK versions
 
-Payment statuses: `PAYMENT_INITIATED`, `PAYMENT_COMPLETED`, `PAYMENT_FAILED`,
-`PAYMENT_CANCELLED`.
+From 5.0.0, `capturePayment` and `removePayment` are deprecated: they still
+work, show an IDE deprecation warning, and will be removed in a future major
+version. Bridges built on Android SDK 4.x or LinkrunnerKit 4.x expose
+`LinkrunnerSDK.CapturePayment(...)` / `RemovePayment(...)` (results on
+`OnPaymentCaptured` / `OnPaymentRemoved`); the current doc bridges no longer
+include them.
 
-`amount` must be a numeric type, not a string - ad network revenue
-optimization depends on it.
-
-Subscribe: `LinkrunnerSDK.OnPaymentCaptured += (success, message) => { ... };`
-and `LinkrunnerSDK.OnPaymentRemoved += (success, message) => { ... };`
+To move existing calls to `trackEvent` (same payment name, `currency` added),
+run `npx @linkrunner/skills add migrate-payments` or follow
+https://docs.linkrunner.io/sdk/migrate-to-track-event.
 
 ## Custom events
 
@@ -151,8 +187,7 @@ LinkrunnerSDK.SetDisableAaidCollection(true);
 | `Signup` | After onboarding | Once per user |
 | `SetUserData` | Auth/session logic | Every app open with a logged-in user |
 | `TrackEvent` | Throughout the app | On user actions |
-| `CapturePayment` | Payment flow | When payment succeeds |
-| `RemovePayment` | Refund flow | When payment is reversed |
+| `TrackEvent` with payment keys | Payment flow | When payment succeeds; again with `PAYMENT_CANCELLED` on refund |
 | `SetPushToken` | After token refresh | When push token changes |
 | `HandleDeeplink` | Deeplink entry points | When app is opened via a deeplink (see `references/deep-linking.md`) |
 

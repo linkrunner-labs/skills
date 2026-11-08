@@ -4,10 +4,12 @@ Source of truth: https://docs.linkrunner.io/api-reference/event-capture and
 https://docs.linkrunner.io/api-reference/revenue-tracking
 
 Use these HTTP APIs for server-to-server tracking (webhooks, cron jobs,
-backend order processing) - and as the **only** way to track custom events or
-revenue from a web app, since the Linkrunner web SDK doesn't expose a client
-`trackEvent`/`capturePayment` call (it only auto-tracks page views and
-exposes `getStoreLink`).
+backend order processing) - and for revenue from a web app, since the
+Linkrunner web SDK has no client payment call.
+
+App payments go through **Capture Event** with the payment fields. **Capture
+Payment** is deprecated for app payments (it keeps working) and is still the
+path for website payments with `"source": "web"`.
 
 ## Base URL & auth
 
@@ -34,9 +36,16 @@ POST /capture-event
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| `event_name` | string | **Required.** Name of the event |
-| `event_data` | object | Optional. Additional data - include a numeric `amount` to enable ad-network revenue sharing |
-| `user_id` | string | **Required.** User identifier to associate the event with |
+| `event_name` | string | **Required.** Name of the event. For a payment, the payment type (stored exactly as sent) |
+| `event_data` | object | Optional. Additional data, such as Meta/Google product fields. An `amount` in here does **not** make a payment on its own |
+| `user_id` | string | **Required** unless `install_instance_id` is sent. Always send it for payments |
+| `install_instance_id` | string | **Required** unless `user_id` is sent |
+| `event_id` | string | Optional. Your own id for the event |
+| `event_timestamp` | string | Optional. When the event happened, ISO 8601 with a timezone, for example `2026-01-31T10:15:30Z`. See below |
+| `amount` | number | Payment field. Order total, 0 or more |
+| `payment_id` | string | Payment field. Your unique transaction id, non-empty |
+| `currency` | string | Payment field. 3-letter ISO 4217 code |
+| `status` | string | Optional, payments only. `PAYMENT_INITIATED`, `PAYMENT_COMPLETED` (default), `PAYMENT_FAILED`, `PAYMENT_CANCELLED` |
 
 ```bash
 curl -X POST https://api.linkrunner.io/api/v1/capture-event \
@@ -44,27 +53,77 @@ curl -X POST https://api.linkrunner.io/api/v1/capture-event \
   -H "linkrunner-key: YOUR-SERVER-KEY" \
   -d '{
     "event_name": "purchase_completed",
-    "event_data": { "order_id": "ORD-12345", "amount": 149.99, "currency": "USD" },
+    "amount": 149.99,
+    "payment_id": "ORD-12345",
+    "currency": "USD",
+    "event_data": { "content_ids": ["ABC123"], "order_id": "ORD-12345" },
     "user_id": "user_12345"
   }'
 ```
 
-Responses: `201` captured, `400` missing required parameters, `401` invalid
-server key.
+**Payment fields:** send `amount`, `payment_id` and `currency` at the top
+level, all three together. With none of them, or only one or two, the
+request is a custom event and still returns `200`. Old payment types keep their uppercase spelling as
+`event_name` (`FIRST_PAYMENT`, `DEFAULT`, ...) so existing mappings keep
+matching. A retry with the same `payment_id`, `event_name` and `status` is
+not stored twice and still returns `200`. Refund: same `event_name` and
+`payment_id` with `status` `PAYMENT_CANCELLED`.
+
+**Older SDK shape:** when no top-level payment field is sent and `event_data`
+has `paymentId`, `amount`, `currency` and `userId` in camelCase, the event is
+also stored as a payment. If one of them is missing or invalid it stays a
+custom event and still returns `200`. `payment_id` inside `event_data` is not
+read. Send new server code with the top-level fields.
+
+**One path per payment:** send a payment through Capture Event or Capture
+Payment, not both. The same payment id under the same name is stored once;
+under different names it counts twice.
+
+**Event time:** `event_timestamp` records when the event or payment happened,
+useful when you queue events and send them later. It can be at most 7 days in
+the past and 10 minutes in the future, or the request returns `400`. Leave it
+out if the event is happening now. For `"source": "web"` events it is saved,
+but Web Events reports and postbacks still use the receive time.
+
+Responses: `200` event or payment captured, `400` missing or invalid
+parameters (including an invalid payment field when all three are sent, or a
+bad `event_timestamp`), `401` invalid server key.
 
 For the ecommerce (`AddToCart`/`ViewContent`) field requirements, see
 `references/ecommerce-events.md`.
 
-## Capture Payment
+## Capture Events in a Batch
+
+```
+POST /capture-event/batch
+```
+
+Use it when a backend sends many events, for example from a queue. The body is
+`{ "events": [ ... ] }` with 1 to 100 events, at most 1 MB in total. Each event
+has the same format and rules as Capture Event, including payment fields and
+its own `event_timestamp`. Events are processed in order.
+
+A `200` can still contain rejected or failed events, even when all of them
+failed, so check each event's result and resend only those. `400` means the
+body is invalid and nothing was captured, `413` means it is over 1 MB, and
+`429` includes more than 5 batches per second from one server key.
+
+## Capture Payment (deprecated for app payments)
 
 ```
 POST /capture-payment
 ```
 
+Deprecated for app payments: it keeps working for existing integrations, but
+send new app payments through Capture Event above. Website payments still use
+it with `"source": "web"` (see
+https://docs.linkrunner.io/api-reference/revenue-tracking#website-payments);
+those are **not** deduplicated.
+
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `user_id` | string | **Required** |
-| `payment_id` | string | Optional but recommended - dedup key together with `type` |
+| `payment_id` | string | Optional but recommended - dedup key together with `type` (app payments only) |
 | `amount` | number | **Required**, single currency only |
 | `type` | string | Optional, defaults to `DEFAULT` |
 | `status` | string | Optional, defaults to `PAYMENT_COMPLETED` |
@@ -89,11 +148,14 @@ Full field semantics (types, statuses, dedup, refunds) are in
 `references/revenue.md` - don't duplicate that reasoning here, just the wire
 format.
 
-## Remove Payment
+## Remove Payment (legacy)
 
 ```
 POST /remove-payment
 ```
+
+No longer in the API docs. For a refund, send Capture Event with the same
+`event_name` and `payment_id` and `status` `PAYMENT_CANCELLED` instead.
 
 | Parameter | Type | Description |
 | --- | --- | --- |

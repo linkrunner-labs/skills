@@ -45,8 +45,9 @@ bash scripts/scan-integration.sh <app-root>   # scripts/ is relative to this ski
 ```
 
 It prints the stack, the SDK dependency and version, every candidate call site with file:line, the
-`trackEvent` name inventory, hygiene smells (hardcoded `debug: true`, token literals, unstable
-`paymentId`, string `amount`, guarded calls), the platform config, and a per-method coverage count.
+`trackEvent` name inventory, `trackEvent` payments, hygiene smells (hardcoded `debug: true`, token
+literals, unstable `paymentId`, string `amount`, payment missing `currency`, wrong-case payment names,
+deprecated `capturePayment`/`removePayment`, guarded calls), the platform config, and a per-method coverage count.
 **It is a map, not a verdict.** Open and read every line before it becomes a finding.
 
 ## 2. Resolve and judge
@@ -89,6 +90,8 @@ Runtime testing cannot see these, so spend your attention here:
   lands on the home screen.
 - `paymentId` built from `Date.now()` or a fresh UUID - server-side dedup fails and retries double-count.
 - `amount` passed as a string - ad-network revenue sharing drops it.
+- A `trackEvent` payment without `currency` (rejected, nothing sent) or with an old payment type in the
+  wrong case (`first_payment` for `FIRST_PAYMENT`), which no Meta/Google/SKAN mapping matches.
 - Event names built with template strings or concatenation, which fill the dashboard with one-off names.
 - A hardcoded, staging, or wrong project token; `debug: true` on a release path.
 - Two `init` sites, or call sites in code that never runs.
@@ -99,8 +102,12 @@ Runtime testing cannot see these, so spend your attention here:
 
 - Absent optional parameters (rule 7).
 - Behaviour inside the Linkrunner SDK itself. Report it to support@linkrunner.io instead.
-- Revenue sent server-to-server instead of through `capturePayment` - a valid design. Check the backend
-  before calling it missing.
+- Revenue sent server-to-server (`/capture-event` with payment fields, or the deprecated
+  `/capture-payment`) instead of from the SDK - a valid design. Check the backend before calling it missing.
+- `capturePayment` / `removePayment` on SDK versions where they are deprecated are **not** errors: they still
+  work. Report them as one Low finding recommending migration with the migrate-payments skill
+  (`npx @linkrunner/skills add migrate-payments`). Count `trackEvent` calls with `amount` + `paymentId` +
+  `currency` as revenue.
 - Development-only effects: React StrictMode double effects, Fast Refresh re-runs.
 - Code style, wrapper design, file layout.
 
@@ -122,7 +129,8 @@ platform config, and the limits of a static review. Then tell the user:
 - the top one to three fixes, in order;
 - to verify on a device with [SDK Integration Testing](https://docs.linkrunner.io/testing/integration-testing);
 - which skill applies the fixes: `npx @linkrunner/skills add <platform>`, `add events` for event and
-  revenue wiring, `add deep-links` if links open the browser.
+  revenue wiring, `add migrate-payments` to move deprecated `capturePayment`/`removePayment` calls,
+  `add deep-links` if links open the browser.
 
 ## References
 

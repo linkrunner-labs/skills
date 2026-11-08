@@ -70,28 +70,72 @@ await linkrunner.setUserData({
 
 ## Revenue
 
-```typescript
-await linkrunner.capturePayment({
-    amount: 100, // Required
-    userId: "user123", // Required
-    paymentId: "payment456", // Required: unique payment identifier, used to deduplicate transactions
-    type: "FIRST_PAYMENT", // Optional: FIRST_PAYMENT | WALLET_TOPUP | FUNDS_WITHDRAWAL |
-                           // SUBSCRIPTION_CREATED | SUBSCRIPTION_RENEWED | ONE_TIME | RECURRING | DEFAULT
-    status: "PAYMENT_COMPLETED", // Optional: PAYMENT_INITIATED | PAYMENT_COMPLETED |
-                                  // PAYMENT_FAILED | PAYMENT_CANCELLED (default PAYMENT_COMPLETED)
-});
+A payment is a `trackEvent` call with `amount`, `paymentId` and `currency`
+together in `eventData`, plus `userId`. Needs `capacitor-linkrunner`
+**3.0.0+** (older versions: see below). Revenue is stored for all users,
+including organic ones.
 
-// refund / undo
-await linkrunner.removePayment({
-    userId: "user123", // Identifier for the user
-    paymentId: "payment456", // Optional
-});
+```typescript
+import linkrunner, { PaymentStatus } from "capacitor-linkrunner";
+
+try {
+    await linkrunner.trackEvent("purchase", { // payment type in reports and mappings
+        amount: 1499,             // required: order total, a number >= 0
+        paymentId: "order_123",   // required: your order id, dedup key
+        currency: "INR",          // required: 3-letter ISO 4217
+        userId: "user_123",       // required: "" = user saved by signup
+        status: PaymentStatus.PAYMENT_COMPLETED, // optional, the default
+        // optional: other keys stay event data (Meta/Google product fields)
+        content_ids: ["sku_1"],
+        num_items: 1,
+        order_id: "order_123",
+    });
+} catch (error) {
+    // Android: invalid payment, nothing sent
+    console.error("Invalid payment:", error);
+}
 ```
 
-`removePayment` needs at least one of `paymentId` or `userId`. With only
-`userId`, all of that user's payments are removed.
+- **The event name is the payment type.** It is stored exactly as sent and
+  matched exactly, letter case included, against Meta, Google, SKAN and
+  affiliate mappings. Old payment types keep their uppercase spelling:
+  `FIRST_PAYMENT`, `SECOND_PAYMENT`, `TRIAL_STARTED`, `TRIAL_CANCELLED`,
+  `WALLET_TOPUP`, `FUNDS_WITHDRAWAL`, `SUBSCRIPTION_CREATED`,
+  `SUBSCRIPTION_RENEWED`, `SUBSCRIPTION_CANCELLED`, `SUBSCRIPTION_REFUNDED`,
+  `SUBSCRIPTION_BILLING_ISSUE`, `DEFAULT`, `ONE_TIME`, `RECURRING`.
+  `first_payment` is a new type that no existing mapping matches, and any new
+  name (such as `purchase`) needs its own dashboard mapping before it reaches
+  ad networks.
+- Required: `amount` (a number, 0 or more, the order total), `paymentId` (your
+  stable order or transaction id, never a random value), `currency` (3-letter
+  ISO 4217, such as `INR`) and `userId` (`""` uses the user saved by `signup`
+  or `setUserData`).
+- `status` is optional: `PAYMENT_INITIATED`, `PAYMENT_COMPLETED` (default),
+  `PAYMENT_FAILED`, `PAYMENT_CANCELLED`. Only `PAYMENT_COMPLETED` counts as
+  revenue and is sent to ad networks.
+- `amount` or `currency` without `paymentId` is a normal custom event.
+  `paymentId` with `amount` or `currency` missing, a negative `amount`, a
+  blank `paymentId` or a non-3-letter `currency` is rejected and nothing is
+  sent: on Android the promise rejects with code `TRACK_EVENT_FAILED`. On iOS
+  it resolves: the payment is dropped and debug builds log the reason.
+- Linkrunner keeps one payment per `paymentId` + event name + `status`, so
+  retries are safe. The same `paymentId` under two event names counts twice.
+- Refund or cancellation: same event name and `paymentId`, the original
+  `amount` and `currency`, and `status` `PAYMENT_CANCELLED`.
+- `PaymentStatus` is exported by `capacitor-linkrunner`; plain strings work
+  too.
 
-Revenue is only stored for attributed users - `signup` must run first.
+### Older SDK versions
+
+From 3.0.0, `capturePayment` and `removePayment` are deprecated: they still
+work, show an IDE deprecation warning, and will be removed in a future major
+version. On 2.x, payments use
+`linkrunner.capturePayment({ amount, userId, paymentId, type, status })` and
+refunds use `linkrunner.removePayment({ userId, paymentId })`.
+
+To move existing calls to `trackEvent` (same payment name, `currency` added),
+run `npx @linkrunner/skills add migrate-payments` or follow
+https://docs.linkrunner.io/sdk/migrate-to-track-event.
 
 ## Custom / ecommerce events
 
@@ -107,19 +151,8 @@ The third argument, `eventId`, is optional and lets you pass your own unique
 identifier for the event - useful for deduplication and correlating with your
 backend.
 
-To share revenue with ad networks (Google Ads, Meta) for optimization,
-include a numeric `amount` field in the event data:
-
-```typescript
-await linkrunner.trackEvent("purchase_completed", {
-    product_id: "12345",
-    category: "electronics",
-    amount: 149.99, // must be a number, not a string
-});
-```
-
-Prefer `capturePayment` over `trackEvent` for actual purchases (see Revenue
-above). Events, like revenue, are only stored for attributed users.
+An `amount` without `paymentId` and `currency` is ordinary event data, not
+revenue. To send revenue to ad networks, send a payment (see Revenue above).
 
 ## Attribution + resolved deeplink
 
